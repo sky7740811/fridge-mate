@@ -74,8 +74,10 @@ input, select, textarea { font-size: 16px; }
   <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:20px;">
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Nom</label>
-      <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onNameInput()" list="foodSuggest" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
-      <datalist id="foodSuggest"></datalist>
+      <div style="position:relative;">
+        <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onNameInput()" autocomplete="off" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+        <div id="nameDropdown" style="display:none;position:absolute;z-index:50;background:white;border:1px solid #e5e7eb;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
+      </div>
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Categorie</label>
@@ -234,28 +236,70 @@ function deleteFood(id) {
   render();
 }
 
+let _selIdx = -1;
+
 function onNameInput() {
   const el = document.getElementById('inputName');
   const val = el.value.trim().toLowerCase();
+  const dd = document.getElementById('nameDropdown');
 
-  // Populate datalist on first input
-  const dl = document.getElementById('foodSuggest');
-  if (!dl.hasChildNodes()) {
-    dl.innerHTML = PRODUCT_DB.map(p => `<option value="${p.n}">`).join('');
+  if (!val) { dd.style.display = 'none'; checkForm(); return; }
+
+  // Filter products
+  const matches = PRODUCT_DB.filter(p =>
+    p.n.toLowerCase().includes(val)
+  ).slice(0, 12);
+
+  if (matches.length === 0) {
+    dd.style.display = 'none';
+    checkForm();
+    return;
   }
 
-  // Find matching product
-  const match = PRODUCT_DB.find(p => p.n.toLowerCase() === val);
-  if (match) {
-    selectCat(match.c);
-    // Auto-fill expiry
-    const added = document.getElementById('inputAdded').value || today();
-    const d = new Date(added);
-    d.setDate(d.getDate() + match.s);
-    document.getElementById('inputExpires').value = d.toISOString().split('T')[0];
+  _selIdx = -1;
+  dd.innerHTML = matches.map((p, i) =>
+    `<div onclick="selectProduct(${i})" data-idx="${i}" style="padding:12px 14px;font-size:15px;border-bottom:1px solid #f3f4f6;cursor:pointer;display:flex;justify-content:space-between;">
+      <span>${p.n}</span>
+      <span style="color:#9ca3af;font-size:12px;">${CAT_ICONS[p.c]||''} ${p.c}</span>
+    </div>`
+  ).join('');
+  dd.style.display = 'block';
+
+  // Auto-select if exact match
+  const exact = PRODUCT_DB.find(p => p.n.toLowerCase() === val);
+  if (exact) {
+    document.getElementById('inputExpires').value = calcExpiry(exact.s);
+    selectCat(exact.c);
   }
   checkForm();
 }
+
+function calcExpiry(shelfDays) {
+  const added = document.getElementById('inputAdded').value || today();
+  const d = new Date(added);
+  d.setDate(d.getDate() + shelfDays);
+  return d.toISOString().split('T')[0];
+}
+
+function selectProduct(idx) {
+  const items = document.getElementById('nameDropdown').children;
+  const match = PRODUCT_DB.find(p => p.n === items[idx].textContent.trim().split(' ')[0]);
+  if (!match) return;
+  document.getElementById('inputName').value = match.n;
+  document.getElementById('inputExpires').value = calcExpiry(match.s);
+  selectCat(match.c);
+  document.getElementById('nameDropdown').style.display = 'none';
+  checkForm();
+}
+
+// Hide dropdown on click outside
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('nameDropdown');
+  const inp = document.getElementById('inputName');
+  if (dd && inp && !inp.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
 
 function checkForm() {
   const name = document.getElementById('inputName').value.trim();
@@ -277,11 +321,7 @@ function saveFood() {
   // Auto-fill expiry if not set
   if (!expires) {
     const match = PRODUCT_DB.find(p => p.n.toLowerCase() === name.toLowerCase());
-    const days = match ? match.s : 7;
-    const added = document.getElementById('inputAdded').value || today();
-    const d = new Date(added);
-    d.setDate(d.getDate() + days);
-    expires = d.toISOString().split('T')[0];
+    expires = calcExpiry(match ? match.s : 7);
   }
 
   foods.push({
