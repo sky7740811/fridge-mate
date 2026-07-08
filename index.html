@@ -31,6 +31,7 @@ body.dark .bg-red-50 { background: #3d1a1a !important; }
 input, select, textarea { font-size: 16px; }
 body.dark .text-gray-300 { color: #4a5568 !important; }
 body.dark select, body.dark input, body.dark textarea { background: #1a1a2e !important; color: #e0e0e0 !important; border-color: #0f3460 !important; }
+body.dark input[type=checkbox] { accent-color: #3b82f6; }
 </style>
 </head>
 <body>
@@ -178,7 +179,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 
 // Force refresh on version change
 (function() {
@@ -452,11 +453,31 @@ function onNameInput() {
   checkForm();
 }
 
+function onFrozenToggle() {
+  const name = document.getElementById('inputName').value.trim().toLowerCase();
+  const match = PRODUCT_DB.find(p => p.n.toLowerCase() === name);
+  if (match) document.getElementById('inputExpires').value = calcExpiry(match.s);
+  else {
+    const added = document.getElementById('inputAdded').value || today();
+    const d = new Date(added);
+    const frozen = document.getElementById('inputFrozen').checked;
+    d.setDate(d.getDate() + (frozen ? getFrozenDays(selectedCategory) : 7));
+    document.getElementById('inputExpires').value = d.toISOString().split('T')[0];
+  }
+}
+
+function getFrozenDays(cat) {
+  const m = { 'Viande':180,'Poisson':180,'Legumes':300,'Fruits':300,
+    'Produits laitiers':90,'Boissons':30,'Transforme':180,'Epices':365 };
+  return m[cat] || 180;
+}
+
 function calcExpiry(shelfDays) {
   const added = document.getElementById('inputAdded').value || today();
   const d = new Date(added);
   const frozen = document.getElementById('inputFrozen').checked;
-  d.setDate(d.getDate() + (frozen ? shelfDays * 10 : shelfDays));
+  const cat = selectedCategory;
+  d.setDate(d.getDate() + (frozen ? getFrozenDays(cat) : shelfDays));
   return d.toISOString().split('T')[0];
 }
 
@@ -499,15 +520,17 @@ async function saveFood() {
     cat: selectedCategory, added: document.getElementById('inputAdded').value || today(),
     expires, notes: document.getElementById('inputNotes').value,
     frozen: document.getElementById('inputFrozen').checked,
-  }).select().single();
+  });
   document.getElementById('inputName').value = '';
   document.getElementById('inputQty').value = '1';
   document.getElementById('inputAdded').value = today();
   document.getElementById('inputExpires').value = '';
   document.getElementById('inputNotes').value = '';
+  document.getElementById('inputFrozen').checked = false;
   selectedCategory = 'Autres';
   checkForm();
   showScreen('mainScreen');
+  render();
 }
 
 let selectedCategory = 'Autres';
