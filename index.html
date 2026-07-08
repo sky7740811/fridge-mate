@@ -33,7 +33,7 @@ body.dark select, body.dark input, body.dark textarea { background: #1a1a2e; col
 
 <!-- ==================== MAIN SCREEN (default active) ==================== -->
 <div id="mainScreen" class="screen active">
-  <div class="bg-white border-gray-100" style="padding:48px 20px 16px;border-bottom:1px solid;">
+  <div class="bg-white border-gray-100" style="padding:48px 20px 8px;border-bottom:1px solid;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h1 style="font-size:22px;font-weight:700;">🧊 Mon Frigo</h1>
@@ -43,6 +43,7 @@ body.dark select, body.dark input, body.dark textarea { background: #1a1a2e; col
         <span style="font-size:12px;" class="text-gray-400">👨‍👩‍👧‍👧</span>
       </div>
     </div>
+    <div id="debugMsg" style="font-size:11px;color:#ef4444;margin-top:4px;min-height:16px;"></div>
   </div>
   <div class="bg-white border-gray-50" style="display:flex;gap:8px;padding:12px 20px;">
     <div class="bg-blue-50" style="flex:1;border-radius:12px;padding:10px;text-align:center;">
@@ -149,10 +150,20 @@ body.dark select, body.dark input, body.dark textarea { background: #1a1a2e; col
 </div>
 
 <script>
+// ===================== ERROR CATCHER =====================
+window.onerror = function(msg, url, line) {
+  const el = document.getElementById('debugMsg');
+  if (el) el.textContent = 'Err: ' + msg + ' (l.' + line + ')';
+};
+window.addEventListener('unhandledrejection', function(e) {
+  const el = document.getElementById('debugMsg');
+  if (el) el.textContent = 'Promise: ' + e.reason;
+});
+
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.3';
 
 // Force refresh on version change
 (function() {
@@ -175,18 +186,22 @@ let foods = [];
 let currentFilter = 'Tous';
 
 // ===================== AUTO LOGIN =====================
-(async () => {
+(async function tryLogin(attempt) {
+  attempt = attempt || 1;
   try {
     const { data } = await _sb.auth.getSession();
-    if (!data.session) {
+    if (!data || !data.session) {
       const { error } = await _sb.auth.signInWithPassword({ email: 'fridge@family.app', password: 'fridge123' });
-      if (error) console.error('Login failed:', error.message);
+      if (error) throw new Error(error.message);
     }
   } catch(e) {
-    console.error('Login error:', e);
+    document.getElementById('debugMsg').textContent = 'Login: ' + e.message;
+    if (attempt < 3) {
+      setTimeout(() => tryLogin(attempt + 1), 2000);
+      return;
+    }
   }
-  // Retry load a few times in case session isn't ready
-  setTimeout(() => { showScreen('mainScreen'); loadFoods(); subscribe(); }, 800);
+  setTimeout(() => { showScreen('mainScreen'); loadFoods(); subscribe(); }, 500);
 })();
 
 // ===================== LOAD & SYNC =====================
@@ -197,7 +212,7 @@ async function loadFoods() {
     if (error) throw error;
     foods = data || [];
   } catch(e) {
-    console.error('loadFoods error:', e);
+    document.getElementById('debugMsg').textContent = 'Load: ' + e.message;
     foods = [];
   }
   render();
@@ -217,6 +232,7 @@ async function addFood(item) {
     added_by: user ? user.id : '1cbb9bb0-5374-4613-beeb-071ce7561438',
   }).select().single();
   if (!error && data) { foods.push(data); render(); }
+  if (error) document.getElementById('debugMsg').textContent = 'Add: ' + error.message;
   return error;
 }
 
