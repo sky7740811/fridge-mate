@@ -19,56 +19,8 @@ input, select, textarea { font-size: 16px; }
 </head>
 <body>
 
-<!-- ==================== AUTH SCREEN ==================== -->
-<div id="authScreen" class="screen" style="justify-content:center;align-items:center;background:linear-gradient(135deg,#eff6ff,#e0e7ff);padding:24px;">
-  <div style="text-align:center;margin-bottom:32px;">
-    <div style="font-size:64px;margin-bottom:12px;">🧊</div>
-    <h1 style="font-size:28px;font-weight:800;color:#1f2937;">Fridge Mate</h1>
-    <p style="color:#6b7280;font-size:14px;margin-top:4px;">Notre frigo partage</p>
-  </div>
-  <form id="authForm" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;">
-    <input id="authEmail" type="email" placeholder="Email" required style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
-    <input id="authPw" type="password" placeholder="Mot de passe" required style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
-    <button id="authBtn" type="submit" style="width:100%;padding:14px;border-radius:12px;border:none;background:#3b82f6;color:white;font-size:16px;font-weight:600;">Se connecter</button>
-    <div style="display:flex;align-items:center;gap:12px;margin:4px 0;">
-      <div style="flex:1;height:1px;background:#e5e7eb;"></div>
-      <span style="color:#9ca3af;font-size:12px;">ou</span>
-      <div style="flex:1;height:1px;background:#e5e7eb;"></div>
-    </div>
-    <button type="button" onclick="googleLogin()" style="width:100%;padding:12px;border-radius:12px;border:1px solid #e5e7eb;background:white;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-      <span style="font-size:20px;">G</span> Google
-    </button>
-    <p style="text-align:center;color:#9ca3af;font-size:13px;">
-      Pas de compte ? <a href="#" onclick="toggleAuthMode()" style="color:#3b82f6;text-decoration:none;font-weight:500;">S'inscrire</a>
-    </p>
-    <p id="authError" style="text-align:center;color:#ef4444;font-size:13px;display:none;"></p>
-  </form>
-</div>
-
-<!-- ==================== FAMILY SCREEN ==================== -->
-<div id="familyScreen" class="screen" style="justify-content:center;align-items:center;background:#f9fafb;padding:24px;">
-  <div style="text-align:center;margin-bottom:32px;">
-    <div style="font-size:64px;margin-bottom:12px;">👨‍👩‍👧‍👦</div>
-    <h1 style="font-size:24px;font-weight:700;color:#1f2937;">Bienvenue !</h1>
-    <p id="familyDesc" style="color:#6b7280;font-size:14px;margin-top:4px;"></p>
-  </div>
-  <div id="familyActions" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;">
-    <div id="newFamilyBox" style="background:white;border-radius:16px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.05);text-align:center;">
-      <p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Creez un frigo et invitez votre partenaire</p>
-      <button onclick="createFamily()" style="width:100%;padding:14px;border-radius:12px;border:none;background:#3b82f6;color:white;font-size:16px;font-weight:600;">Creer mon frigo</button>
-    </div>
-    <div style="text-align:center;color:#d1d5db;font-size:13px;">ou</div>
-    <div id="joinBox" style="background:white;border-radius:16px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.05);text-align:center;">
-      <p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Vous avez un code d'invitation ?</p>
-      <input id="inviteCode" placeholder="Code a 6 chiffres" maxlength="6" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;text-align:center;letter-spacing:6px;margin-bottom:12px;">
-      <button onclick="joinFamily()" style="width:100%;padding:14px;border-radius:12px;border:none;background:#10b981;color:white;font-size:16px;font-weight:600;">Rejoindre</button>
-    </div>
-  </div>
-  <p id="familyError" style="text-align:center;color:#ef4444;font-size:13px;margin-top:16px;display:none;"></p>
-</div>
-
-<!-- ==================== MAIN SCREEN ==================== -->
-<div id="mainScreen" class="screen">
+<!-- ==================== MAIN SCREEN (default active) ==================== -->
+<div id="mainScreen" class="screen active">
   <div style="background:white;padding:48px 20px 16px;border-bottom:1px solid #f3f4f6;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
@@ -76,8 +28,7 @@ input, select, textarea { font-size: 16px; }
         <p id="currentDate" style="font-size:13px;color:#9ca3af;margin-top:2px;"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
-        <span style="font-size:12px;color:#9ca3af;" id="familyBadge"></span>
-        <button onclick="logout()" style="border:none;background:none;color:#9ca3af;font-size:14px;cursor:pointer;">🚪</button>
+        <span style="font-size:12px;color:#9ca3af;" id="familyBadge">👨‍👩‍👧‍👧</span>
       </div>
     </div>
   </div>
