@@ -135,7 +135,11 @@ body.dark select, body.dark input, body.dark textarea { background: #1a1a2e; col
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Quantite</label>
-      <input id="inputQty" value="1" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="adjQty(-1)" style="width:40px;height:40px;border-radius:10px;border:1px solid #e5e7eb;background:white;font-size:18px;cursor:pointer;flex-shrink:0;">−</button>
+        <input id="inputQty" value="1" style="flex:1;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;text-align:center;">
+        <button onclick="adjQty(1)" style="width:40px;height:40px;border-radius:10px;border:1px solid #e5e7eb;background:white;font-size:18px;cursor:pointer;flex-shrink:0;">+</button>
+      </div>
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Ajoute le</label>
@@ -169,7 +173,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.0.8';
+const APP_VERSION = '1.0.9';
 
 // Force refresh on version change
 (function() {
@@ -244,13 +248,23 @@ async function addFood(item) {
   return error;
 }
 
-async function deleteFood(id) {
+function deleteFood(id) {
   if (!confirm('Supprimer ?')) return;
-  await _sb.from('foods').delete().eq('id', id);
-  foods = foods.filter(f => f.id !== id);
-  render();
+  _sb.from('foods').delete().eq('id', id).then(() => {
+    foods = foods.filter(f => f.id !== id);
+    render();
+  });
 }
 
+async function updateQty(id, delta) {
+  const f = foods.find(x => x.id === id);
+  if (!f) return;
+  let qty = parseInt(f.quantity) || 1;
+  qty = Math.max(1, qty + delta);
+  f.quantity = String(qty);
+  await _sb.from('foods').update({ quantity: f.quantity }).eq('id', id);
+  render();
+}
 // ===================== REALTIME =====================
 function subscribe() {
   const channel = _sb.channel('foods-changes')
@@ -400,6 +414,11 @@ function render() {
         </div>
       </div>
       <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;background:${badge.bg};color:${badge.color||'white'};white-space:nowrap;">${badge.text}</span>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center;">
+        <button onclick="updateQty('${f.id}',1)" style="border:none;background:none;color:#9ca3af;font-size:14px;cursor:pointer;line-height:1;padding:0;">▲</button>
+        <span style="font-size:11px;color:#6b7280;">${f.quantity}</span>
+        <button onclick="updateQty('${f.id}',-1)" style="border:none;background:none;color:#9ca3af;font-size:14px;cursor:pointer;line-height:1;padding:0;">▼</button>
+      </div>
       <button onclick="deleteFood('${f.id}')" style="border:none;background:none;color:#d1d5db;font-size:20px;cursor:pointer;padding:4px;">×</button>
     </div>`;
   }).join('');
@@ -491,7 +510,14 @@ function initAddScreen() {
 }
 function selectCat(c) {
   selectedCategory = c;
-  document.querySelectorAll('.cat-pick').forEach(el => el.classList.toggle('active', el.textContent === c));
+  document.querySelectorAll('.cat-pick').forEach(el => el.classList.toggle('active', el.textContent.trim().includes(c)));
+}
+
+function adjQty(delta) {
+  const el = document.getElementById('inputQty');
+  let v = parseInt(el.value) || 1;
+  v = Math.max(1, v + delta);
+  el.value = v;
 }
 
 function showScreen(id) {
