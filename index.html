@@ -156,113 +156,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const _sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = null;
-let currentFamilyId = null;
+let currentFamilyId = 'f90b7994-aec3-49c6-813c-04774c89f934';
 let foods = [];
 let currentFilter = 'Tous';
-let isLoginMode = true;
 
-// ===================== AUTH =====================
-_sb.auth.onAuthStateChange((event, session) => {
-  if (session) { currentUser = session.user; afterLogin(); }
-  else { currentUser = null; currentFamilyId = null; showScreen('authScreen'); }
-});
-
-document.getElementById('authForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('authEmail').value;
-  const pw = document.getElementById('authPw').value;
-  const btn = document.getElementById('authBtn');
-  const errEl = document.getElementById('authError');
-  errEl.style.display = 'none';
-  btn.disabled = true; btn.textContent = '...';
-
-  try {
-    if (isLoginMode) {
-      const { error } = await _sb.auth.signInWithPassword({ email, password: pw });
-      if (error) throw error;
-    } else {
-      const { error } = await _sb.auth.signUp({ email, password: pw });
-      if (error) throw error;
-      errEl.style.color = '#10b981';
-      errEl.textContent = 'Compte cree ! Verifiez vos emails.';
-      errEl.style.display = 'block';
-      isLoginMode = true;
-      document.getElementById('authBtn').textContent = 'Se connecter';
-      document.getElementById('authToggle').textContent = "S'inscrire";
-      btn.disabled = false; btn.textContent = 'Se connecter';
-      toggleAuthMode();
-      return;
-    }
-  } catch (err) {
-    errEl.style.color = '#ef4444';
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
+// ===================== AUTO LOGIN =====================
+(async () => {
+  // Try existing session first
+  const { data } = await _sb.auth.getSession();
+  if (!data.session) {
+    // Auto-login with shared account
+    await _sb.auth.signInWithPassword({ email: 'fridge@family.app', password: 'fridge123' });
   }
-  btn.disabled = false; btn.textContent = isLoginMode ? 'Se connecter' : "S'inscrire";
-});
+  // Wait briefly then load
+  setTimeout(() => { showScreen('mainScreen'); loadFoods(); subscribe(); }, 500);
+})();
 
-function toggleAuthMode() {
-  isLoginMode = !isLoginMode;
-  document.getElementById('authBtn').textContent = isLoginMode ? 'Se connecter' : "S'inscrire";
-  document.querySelector('#authForm a').textContent = isLoginMode ? "S'inscrire" : 'Se connecter';
-  document.getElementById('authError').style.display = 'none';
-}
-
-async function googleLogin() {
-  const { error } = await _sb.auth.signInWithOAuth({ provider: 'google' });
-  if (error) { document.getElementById('authError').textContent = error.message; document.getElementById('authError').style.display = 'block'; }
-}
-
-// ===================== FAMILY =====================
-async function afterLogin() {
-  // Check if user is in a family
-  const { data: memberships } = await _sb.from('family_members').select('family_id').eq('user_id', currentUser.id);
-  if (memberships && memberships.length > 0) {
-    currentFamilyId = memberships[0].family_id;
-    initApp();
-  } else {
-    showScreen('familyScreen');
-    document.getElementById('familyDesc').textContent = `Bonjour ${currentUser.email} !`;
-  }
-}
-
-async function createFamily() {
-  const { data: family, error } = await _sb.from('families').insert({
-    name: 'Notre Frigo',
-    invite_code: String(Math.floor(100000 + Math.random() * 900000))
-  }).select().single();
-  if (error) { showError(error.message); return; }
-
-  await _sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id, role: 'owner' });
-  currentFamilyId = family.id;
-  initApp();
-}
-
-async function joinFamily() {
-  const code = document.getElementById('inviteCode').value.trim();
-  if (!code || code.length !== 6) { showError('Code a 6 chiffres requis'); return; }
-  const { data: family } = await _sb.from('families').select('id').eq('invite_code', code).maybeSingle();
-  if (!family) { showError('Code invalide'); return; }
-  const { error } = await _sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id });
-  if (error) { showError(error.message); return; }
-  currentFamilyId = family.id;
-  initApp();
-}
-
-function showError(msg) {
-  const el = document.getElementById('familyError');
-  el.textContent = msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 3000);
-}
-
-function logout() {
-  _sb.auth.signOut();
-  foods = [];
-  render();
-}
-
-// ===================== DATA =====================
+// ===================== LOAD & SYNC =====================
 async function loadFoods() {
   if (!currentFamilyId) return;
   const { data } = await _sb.from('foods').select('*').eq('family_id', currentFamilyId).order('expires_at', { ascending: true });
