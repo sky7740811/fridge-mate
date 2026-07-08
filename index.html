@@ -101,6 +101,10 @@ body.dark select, body.dark input, body.dark textarea { background: #1a1a2e; col
       <div style="font-weight:600;margin-bottom:4px;">A propos</div>
       <div class="text-gray-500" style="font-size:13px;">Fridge Mate v2.0 - Supabase</div>
     </div>
+    <button onclick="clearAppCache()" class="bg-white border-gray-100" style="border-radius:14px;padding:20px;border:1px solid;width:100%;text-align:left;cursor:pointer;">
+      <div style="font-weight:600;">Vider le cache</div>
+      <div class="text-gray-500" style="font-size:13px;">Forcer l'actualisation de l'app</div>
+    </button>
   </div>
 </div>
 
@@ -148,6 +152,18 @@ body.dark select, body.dark input, body.dark textarea { background: #1a1a2e; col
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
+const APP_VERSION = '2.0.5';
+
+// Force refresh on version change
+(function() {
+  const v = localStorage.getItem('fridge-version');
+  if (v && v !== APP_VERSION) {
+    localStorage.clear();
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    location.reload(true);
+  }
+  localStorage.setItem('fridge-version', APP_VERSION);
+})();
 const { createClient } = supabase;
 const _sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -227,6 +243,14 @@ function toggleDarkMode() {
     }, 100);
   }
 })();
+
+function clearAppCache() {
+  if (confirm('Vider le cache et actualiser ?')) {
+    localStorage.clear();
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    location.reload(true);
+  }
+}
 
 // ===================== UI =====================
 const CATEGORIES = ['Viande','Poisson','Legumes','Fruits','Produits laitiers','Boissons','Transforme','Epices','Autres'];
