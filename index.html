@@ -164,7 +164,7 @@ function subscribe() {
 
 // ===================== UI =====================
 const CATEGORIES = ['Viande','Legumes','Fruits','Produits laitiers','Boissons','Transforme','Epices','Autres'];
-const CAT_ICONS = { 'Viande':'🥩','Legumes':'🥬','Fruits':'🍎','Produits laitiers':'🧀','Boissons':'🥤','Transforme':'🥫','Epices':'🧂','Autres':'📦' };
+const CAT_ICONS = { 'Viande':'🥩','Legumes':'🥬','Fruits':'🍎','Produits laitiers':'🧀','Boissons':'🥤','Transforme':'🥫','Epices':'🧂','Autres':'📦','Surgeles':'❄️','Boulangerie':'🥖','Conserve':'🥫' };
 
 const PRODUCT_DB = [
   {n:'Lait',c:'Produits laitiers',s:10},{n:'Lait demi-écrémé',c:'Produits laitiers',s:10},{n:'Lait entier',c:'Produits laitiers',s:10},
@@ -197,6 +197,23 @@ const PRODUCT_DB = [
   {n:'Parmesan',c:'Produits laitiers',s:60},{n:'Camembert',c:'Produits laitiers',s:21},{n:'Comté',c:'Produits laitiers',s:60},
   {n:'Chèvre',c:'Produits laitiers',s:14},{n:'Roquefort',c:'Produits laitiers',s:30},{n:'Feta',c:'Produits laitiers',s:30},
   {n:'Crème glace',c:'Produits laitiers',s:60},
+  {n:'Ketchup',c:'Epices',s:365},{n:'Ketchup',c:'Epices',s:365},{n:'Sauce BBQ',c:'Epices',s:365},{n:'Sauce blanche',c:'Epices',s:30},
+  {n:'Sauce soja',c:'Epices',s:365},{n:'Sauce Nuoc mam',c:'Epices',s:365},{n:'Sauce Sriracha',c:'Epices',s:365},
+  {n:'Wasabi',c:'Epices',s:365},{n:'Gingembre',c:'Epices',s:30},{n:'Ail',c:'Epices',s:60},{n:'Curry',c:'Epices',s:365},
+  {n:'Paprika',c:'Epices',s:365},{n:'Cannelle',c:'Epices',s:365},{n:'Vanille',c:'Epices',s:365},
+  {n:'Levure',c:'Transforme',s:365},{n:'Bicarbonate',c:'Transforme',s:365},{n:'Huile',c:'Epices',s:365},
+  {n:'Cacahuète',c:'Transforme',s:180},{n:'Amande',c:'Transforme',s:180},{n:'Noix',c:'Transforme',s:180},
+  {n:'Pistache',c:'Transforme',s:180},{n:'Muesli',c:'Transforme',s:180},{n:'Flocon avoine',c:'Transforme',s:180},
+  {n:'Pizza surgelée',c:'Transforme',s:180},{n:'Frites surgelées',c:'Transforme',s:180},{n:'Petit pois surgelés',c:'Transforme',s:180},
+  {n:'Epinard surgelé',c:'Transforme',s:180},{n:'Poisson surgelé',c:'Viande',s:180},{n:'Glace vanille',c:'Transforme',s:60},
+  {n:'Sorbet',c:'Transforme',s:60},{n:'Compote',c:'Transforme',s:60},{n:'Purée',c:'Transforme',s:30},
+  {n:'Lentille',c:'Legumes',s:365},{n:'Pois chiche',c:'Legumes',s:365},{n:'Haricot rouge',c:'Legumes',s:365},
+  {n:'Tartinade',c:'Transforme',s:90},{n:'Pâte à tartiner',c:'Transforme',s:90},{n:'Nouilles chinoises',c:'Transforme',s:365},
+  {n:'Taboulé',c:'Transforme',s:7},{n:'Salade composée',c:'Transforme',s:5},{n:'Soupe',c:'Transforme',s:365},
+  {n:'Bouillon cube',c:'Epices',s:365},{n:'Levure chimique',c:'Transforme',s:365},{n:'Gélatine',c:'Transforme',s:365},
+  {n:'Sirop',c:'Boissons',s:365},{n:'Eau minérale',c:'Boissons',s:365},{n:'Jus pomme',c:'Boissons',s:14},
+  {n:'Jus raisin',c:'Boissons',s:14},{n:'Jus multivitaminé',c:'Boissons',s:14},{n:'Coca',c:'Boissons',s:180},
+  {n:'Ice tea',c:'Boissons',s:180},{n:'Perrier',c:'Boissons',s:365},{n:'San Pellegrino',c:'Boissons',s:365},
 ];
 
 const today = () => new Date().toISOString().split('T')[0];
