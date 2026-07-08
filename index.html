@@ -166,7 +166,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.0.5';
+const APP_VERSION = '1.0.6';
 
 // Force refresh on version change
 (function() {
@@ -198,7 +198,8 @@ let currentFilter = 'Tous';
       if (error) throw new Error(error.message);
     }
   } catch(e) {
-    document.getElementById('debugMsg').textContent = 'Login: ' + e.message;
+    const dm = document.getElementById('debugMsg');
+    if (dm) dm.textContent = 'Login: ' + e.message;
     if (attempt < 3) {
       setTimeout(() => tryLogin(attempt + 1), 2000);
       return;
@@ -215,7 +216,8 @@ async function loadFoods() {
     if (error) throw error;
     foods = data || [];
   } catch(e) {
-    document.getElementById('debugMsg').textContent = 'Load: ' + e.message;
+    const dm = document.getElementById('debugMsg');
+    if (dm) dm.textContent = 'Load: ' + e.message;
     foods = [];
   }
   render();
@@ -235,7 +237,7 @@ async function addFood(item) {
     added_by: user ? user.id : '1cbb9bb0-5374-4613-beeb-071ce7561438',
   }).select().single();
   if (!error && data) { foods.push(data); render(); }
-  if (error) document.getElementById('debugMsg').textContent = 'Add: ' + error.message;
+  if (error) { const dm = document.getElementById('debugMsg'); if (dm) dm.textContent = 'Add: ' + error.message; }
   return error;
 }
 
