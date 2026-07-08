@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Fridge Mate</title>
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
 <link rel="manifest" href="/fridge-mate/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FridgeMate">
@@ -166,7 +169,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.0.6';
+const APP_VERSION = '1.0.7';
 
 // Force refresh on version change
 (function() {
@@ -505,7 +508,12 @@ function initApp() {
 }
 
 // ===================== PWA =====================
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/fridge-mate/sw.js');
+// Kill all service workers (caused stale cache issues)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  });
+}
 </script>
 
 <style>
