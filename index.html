@@ -71,7 +71,8 @@ input, select, textarea { font-size: 16px; }
   <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:20px;">
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Nom</label>
-      <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="checkForm()" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+      <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onNameInput()" list="foodSuggest" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+      <datalist id="foodSuggest"></datalist>
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Categorie</label>
@@ -97,8 +98,27 @@ input, select, textarea { font-size: 16px; }
 </div>
 
 <script>
-const CATEGORIES = ['Viande','Legumes/Fruits','Produits laitiers','Boissons','Transforme','Epices','Autres'];
-const CAT_ICONS = { 'Viande':'🥩','Legumes/Fruits':'🥬','Produits laitiers':'🧀','Boissons':'🥤','Transforme':'🥫','Epices':'🧂','Autres':'📦' };
+const CATEGORIES = ['Viande','Legumes','Fruits','Produits laitiers','Boissons','Transforme','Epices','Autres'];
+const CAT_ICONS = { 'Viande':'🥩','Legumes':'🥬','Fruits':'🍎','Produits laitiers':'🧀','Boissons':'🥤','Transforme':'🥫','Epices':'🧂','Autres':'📦' };
+
+const PRODUCT_DB = [
+  {n:'Lait',c:'Produits laitiers',s:10},{n:'Lait demi-écrémé',c:'Produits laitiers',s:10},{n:'Lait entier',c:'Produits laitiers',s:10},
+  {n:'Beurre',c:'Produits laitiers',s:30},{n:'Fromage',c:'Produits laitiers',s:21},{n:'Yaourt',c:'Produits laitiers',s:21},
+  {n:'Crème fraîche',c:'Produits laitiers',s:14},{n:'Œufs',c:'Produits laitiers',s:28},{n:'Oeufs',c:'Produits laitiers',s:28},
+  {n:'Poulet',c:'Viande',s:3},{n:'Bœuf',c:'Viande',s:3},{n:'Steak haché',c:'Viande',s:2},{n:'Porc',c:'Viande',s:3},
+  {n:'Poitrine porc',c:'Viande',s:3},{n:'Jambon',c:'Viande',s:7},{n:'Saucisson',c:'Viande',s:30},{n:'Saucisse',c:'Viande',s:7},
+  {n:'Carotte',c:'Legumes',s:14},{n:'Tomate',c:'Legumes',s:7},{n:'Salade',c:'Legumes',s:5},{n:'Chou',c:'Legumes',s:14},
+  {n:'Brocoli',c:'Legumes',s:7},{n:'Courgette',c:'Legumes',s:7},{n:'Oignon',c:'Legumes',s:30},{n:'Pomme terre',c:'Legumes',s:30},
+  {n:'Concombre',c:'Legumes',s:7},{n:'Poivron',c:'Legumes',s:7},{n:'Champignon',c:'Legumes',s:5},{n:'Aubergine',c:'Legumes',s:7},
+  {n:'Pomme',c:'Fruits',s:14},{n:'Pommes',c:'Fruits',s:14},{n:'Banane',c:'Fruits',s:5},{n:'Orange',c:'Fruits',s:14},
+  {n:'Raisin',c:'Fruits',s:5},{n:'Fraise',c:'Fruits',s:3},{n:'Citron',c:'Fruits',s:14},{n:'Avocat',c:'Fruits',s:4},
+  {n:'Tofu',c:'Transforme',s:7},{n:'Eau',c:'Boissons',s:365},{n:'Jus orange',c:'Boissons',s:14},{n:'Vin',c:'Boissons',s:3650},
+  {n:'Bière',c:'Boissons',s:180},{n:'Soda',c:'Boissons',s:180},{n:'Sauce tomate',c:'Transforme',s:10},{n:'Mayonnaise',c:'Transforme',s:30},
+  {n:'Moutarde',c:'Epices',s:365},{n:'Sel',c:'Epices',s:365},{n:'Poivre',c:'Epices',s:365},{n:'Sucre',c:'Epices',s:365},
+  {n:'Huile olive',c:'Epices',s:365},{n:'Vinaigre',c:'Epices',s:365},{n:'Farine',c:'Transforme',s:180},{n:'Riz',c:'Transforme',s:365},
+  {n:'Pâtes',c:'Transforme',s:365},{n:'Céréales',c:'Transforme',s:180},{n:'Pain',c:'Transforme',s:5},{n:'Chocolat',c:'Transforme',s:180},
+  {n:'Confiture',c:'Transforme',s:180},{n:'Miel',c:'Transforme',s:365},
+];
 
 const today = () => new Date().toISOString().split('T')[0];
 
@@ -111,10 +131,10 @@ function daysBetween(a, b) {
 const MOCK_FOODS = [
   { id:'m1', name:'Lait', qty:'2x', cat:'Produits laitiers', added:'2026-07-01', expires:'2026-07-12' },
   { id:'m2', name:'Oeufs', qty:'10', cat:'Produits laitiers', added:'2026-06-30', expires:'2026-07-15' },
-  { id:'m3', name:'Chou', qty:'1', cat:'Legumes/Fruits', added:'2026-07-05', expires:'2026-07-10' },
+  { id:'m3', name:'Chou', qty:'1', cat:'Legumes', added:'2026-07-05', expires:'2026-07-10' },
   { id:'m4', name:'Poitrine porc', qty:'500g', cat:'Viande', added:'2026-07-06', expires:'2026-07-09' },
   { id:'m5', name:'Tofu', qty:'2', cat:'Transforme', added:'2026-07-03', expires:'2026-07-08' },
-  { id:'m6', name:'Pommes', qty:'5', cat:'Legumes/Fruits', added:'2026-07-04', expires:'2026-07-18' },
+  { id:'m6', name:'Pommes', qty:'5', cat:'Fruits', added:'2026-07-04', expires:'2026-07-18' },
   { id:'m7', name:'Yaourt', qty:'4', cat:'Produits laitiers', added:'2026-07-07', expires:'2026-07-14' },
   { id:'m8', name:'Eau', qty:'6 bouteilles', cat:'Boissons', added:'2026-07-02', expires:'2026-12-31' },
 ];
@@ -190,11 +210,33 @@ function deleteFood(id) {
   render();
 }
 
+function onNameInput() {
+  const el = document.getElementById('inputName');
+  const val = el.value.trim().toLowerCase();
+
+  // Populate datalist on first input
+  const dl = document.getElementById('foodSuggest');
+  if (!dl.hasChildNodes()) {
+    dl.innerHTML = PRODUCT_DB.map(p => `<option value="${p.n}">`).join('');
+  }
+
+  // Find matching product
+  const match = PRODUCT_DB.find(p => p.n.toLowerCase() === val);
+  if (match) {
+    selectCat(match.c);
+    // Auto-fill expiry
+    const added = document.getElementById('inputAdded').value || today();
+    const d = new Date(added);
+    d.setDate(d.getDate() + match.s);
+    document.getElementById('inputExpires').value = d.toISOString().split('T')[0];
+  }
+  checkForm();
+}
+
 function checkForm() {
   const name = document.getElementById('inputName').value.trim();
-  const expires = document.getElementById('inputExpires').value;
   const btn = document.getElementById('saveBtn');
-  if (name && expires) {
+  if (name) {
     btn.disabled = false;
     btn.style.color = '#3b82f6';
   } else {
@@ -205,8 +247,18 @@ function checkForm() {
 
 function saveFood() {
   const name = document.getElementById('inputName').value.trim();
-  const expires = document.getElementById('inputExpires').value;
-  if (!name || !expires) return;
+  let expires = document.getElementById('inputExpires').value;
+  if (!name) return;
+
+  // Auto-fill expiry if not set
+  if (!expires) {
+    const match = PRODUCT_DB.find(p => p.n.toLowerCase() === name.toLowerCase());
+    const days = match ? match.s : 7;
+    const added = document.getElementById('inputAdded').value || today();
+    const d = new Date(added);
+    d.setDate(d.getDate() + days);
+    expires = d.toISOString().split('T')[0];
+  }
 
   foods.push({
     id: String(nextId++),
