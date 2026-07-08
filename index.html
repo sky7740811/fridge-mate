@@ -11,61 +11,115 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+body.dark { background: #1a1a2e; color: #e0e0e0; }
+body:not(.dark) { background: #f9fafb; color: inherit; }
 .screen { display: none; min-height: 100dvh; }
 .screen.active { display: flex; flex-direction: column; }
 input, select, textarea { font-size: 16px; }
+body.dark .card-bg { background: #16213e; border-color: #0f3460; color: #e0e0e0; }
+body:not(.dark) .card-bg { background: white; border-color: #f3f4f6; color: inherit; }
+body.dark .header-bg { background: #16213e; border-color: #0f3460; }
+body:not(.dark) .header-bg { background: white; border-color: #f3f4f6; }
+body.dark .input-bg { background: #1a1a2e; border-color: #0f3460; color: #e0e0e0; }
+body:not(.dark) .input-bg { background: white; border-color: #e5e7eb; color: inherit; }
+body.dark .text-muted { color: #8892b0; }
+body:not(.dark) .text-muted { color: #9ca3af; }
+body.dark .text-strong { color: #ccd6f6; }
+body:not(.dark) .text-strong { color: #111827; }
+body.dark .stat-bg-blue { background: #112240; }
+body:not(.dark) .stat-bg-blue { background: #eff6ff; }
+body.dark .stat-bg-yellow { background: #1e3a1e; }
+body:not(.dark) .stat-bg-yellow { background: #fefce8; }
+body.dark .stat-bg-red { background: #3d1a1a; }
+body:not(.dark) .stat-bg-red { background: #fef2f2; }
+body.dark .nav-bg { background: #16213e; border-color: #0f3460; }
+body:not(.dark) .nav-bg { background: white; border-color: #f3f4f6; }
+body.dark .filter-bg { background: #1a1a2e; color: #8892b0; }
+body:not(.dark) .filter-bg { background: #f3f4f6; color: #6b7280; }
 </style>
 </head>
 <body>
 
 <!-- ==================== MAIN SCREEN (default active) ==================== -->
 <div id="mainScreen" class="screen active">
-  <div style="background:white;padding:48px 20px 16px;border-bottom:1px solid #f3f4f6;">
+  <div class="header-bg" style="padding:48px 20px 16px;border-bottom:1px solid;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <h1 style="font-size:22px;font-weight:700;color:#111827;">🧊 Mon Frigo</h1>
-        <p id="currentDate" style="font-size:13px;color:#9ca3af;margin-top:2px;"></p>
+        <h1 style="font-size:22px;font-weight:700;">🧊 Mon Frigo</h1>
+        <p id="currentDate" style="font-size:13px;margin-top:2px;" class="text-muted"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
-        <span style="font-size:12px;color:#9ca3af;" id="familyBadge">👨‍👩‍👧‍👧</span>
+        <span style="font-size:12px;" class="text-muted">👨‍👩‍👧‍👧</span>
       </div>
     </div>
   </div>
-  <div style="display:flex;gap:8px;padding:12px 20px;background:white;border-bottom:1px solid #f9fafb;">
-    <div style="flex:1;background:#eff6ff;border-radius:12px;padding:10px;text-align:center;">
+  <div style="display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid;" class="header-bg">
+    <div class="stat-bg-blue" style="flex:1;border-radius:12px;padding:10px;text-align:center;">
       <div id="statTotal" style="font-size:20px;font-weight:700;color:#2563eb;">0</div>
       <div style="font-size:11px;color:#60a5fa;">Total</div>
     </div>
-    <div style="flex:1;background:#fefce8;border-radius:12px;padding:10px;text-align:center;">
+    <div class="stat-bg-yellow" style="flex:1;border-radius:12px;padding:10px;text-align:center;">
       <div id="statSoon" style="font-size:20px;font-weight:700;color:#ca8a04;">0</div>
       <div style="font-size:11px;color:#eab308;">Bientot</div>
     </div>
-    <div style="flex:1;background:#fef2f2;border-radius:12px;padding:10px;text-align:center;">
+    <div class="stat-bg-red" style="flex:1;border-radius:12px;padding:10px;text-align:center;">
       <div id="statExpired" style="font-size:20px;font-weight:700;color:#dc2626;">0</div>
       <div style="font-size:11px;color:#f87171;">Expire</div>
     </div>
   </div>
-  <div id="categoryFilter" style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto;background:white;border-bottom:1px solid #f9fafb;"></div>
+  <div id="categoryFilter" class="header-bg" style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto;border-bottom:1px solid;"></div>
   <div id="foodList" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"></div>
   <div style="position:fixed;bottom:72px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;">
     <button onclick="showScreen('addScreen')" style="pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:#3b82f6;color:white;font-size:28px;box-shadow:0 4px 14px rgba(59,130,246,0.4);cursor:pointer;">+</button>
   </div>
-  <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #f3f4f6;padding:6px 20px 20px;">
+  <div class="nav-bg" style="position:fixed;bottom:0;left:0;right:0;border-top:1px solid;padding:6px 20px 20px;">
     <div style="display:flex;justify-content:space-around;text-align:center;">
       <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#3b82f6;">Accueil</div></div>
       <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#d1d5db;">Courses</div></div>
-      <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;">Reglages</div></div>
+      <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('settingsScreen')">Reglages</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SETTINGS SCREEN ==================== -->
+<div id="settingsScreen" class="screen">
+  <div class="header-bg" style="border-bottom:1px solid;padding:48px 20px 16px;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <button onclick="showScreen('mainScreen')" style="border:none;background:none;font-size:20px;cursor:pointer;color:inherit;">←</button>
+      <h1 style="font-size:18px;font-weight:700;">Reglages</h1>
+    </div>
+  </div>
+  <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:20px;">
+    <div class="card-bg" style="border-radius:14px;padding:20px;border:1px solid;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-weight:600;">Mode sombre</div>
+        <div class="text-muted" style="font-size:13px;">Activer le theme sombre</div>
+      </div>
+      <label style="position:relative;display:inline-block;width:50px;height:26px;">
+        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="opacity:0;width:0;height:0;">
+        <span id="darkTrack" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;border-radius:26px;transition:0.3s;background:#ccc;"></span>
+        <span id="darkSlider" style="position:absolute;cursor:pointer;height:20px;width:20px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s;"></span>
+      </label>
+    </div>
+    <div class="card-bg" style="border-radius:14px;padding:20px;border:1px solid;">
+      <div style="font-weight:600;margin-bottom:8px;">Famille</div>
+      <div class="text-muted" style="font-size:13px;margin-bottom:12px;">Frigo partage avec votre partenaire</div>
+      <div class="text-muted" style="font-size:12px;">👨‍👩‍👧‍👧 Connexion automatique</div>
+    </div>
+    <div class="card-bg" style="border-radius:14px;padding:20px;border:1px solid;">
+      <div style="font-weight:600;margin-bottom:4px;">A propos</div>
+      <div class="text-muted" style="font-size:13px;">Fridge Mate v2.0 - Supabase</div>
     </div>
   </div>
 </div>
 
 <!-- ==================== ADD FOOD SCREEN ==================== -->
 <div id="addScreen" class="screen">
-  <div style="background:white;padding:48px 20px 16px;border-bottom:1px solid #f3f4f6;">
+  <div class="header-bg" style="border-bottom:1px solid;padding:48px 20px 16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <button onclick="showScreen('mainScreen')" style="border:none;background:none;color:#9ca3af;font-size:16px;cursor:pointer;">Annuler</button>
-      <h1 style="font-size:18px;font-weight:700;color:#111827;">Ajouter</h1>
+      <h1 style="font-size:18px;font-weight:700;">Ajouter</h1>
       <button onclick="saveFood()" id="saveBtn" disabled style="border:none;background:none;color:#d1d5db;font-size:16px;font-weight:600;cursor:pointer;">OK</button>
     </div>
   </div>
@@ -73,8 +127,8 @@ input, select, textarea { font-size: 16px; }
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Nom</label>
       <div style="position:relative;">
-        <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onNameInput()" autocomplete="off" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
-        <div id="nameDropdown" style="display:none;position:absolute;z-index:50;background:white;border:1px solid #e5e7eb;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
+        <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onNameInput()" autocomplete="off" class="input-bg" style="width:100%;padding:14px;border-radius:12px;border:1px solid;font-size:16px;">
+        <div id="nameDropdown" class="card-bg" style="display:none;position:absolute;z-index:50;border:1px solid;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
       </div>
     </div>
     <div>
@@ -83,19 +137,19 @@ input, select, textarea { font-size: 16px; }
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Quantite</label>
-      <input id="inputQty" value="1" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+      <input id="inputQty" value="1" class="input-bg" style="width:100%;padding:14px;border-radius:12px;border:1px solid;font-size:16px;">
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Ajoute le</label>
-      <input id="inputAdded" type="date" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+      <input id="inputAdded" type="date" class="input-bg" style="width:100%;padding:14px;border-radius:12px;border:1px solid;font-size:16px;">
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Expire le</label>
-      <input id="inputExpires" type="date" oninput="checkForm()" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+      <input id="inputExpires" type="date" oninput="checkForm()" class="input-bg" style="width:100%;padding:14px;border-radius:12px;border:1px solid;font-size:16px;">
     </div>
     <div>
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Notes</label>
-      <textarea id="inputNotes" rows="2" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;resize:none;"></textarea>
+      <textarea id="inputNotes" rows="2" class="input-bg" style="width:100%;padding:14px;border-radius:12px;border:1px solid;font-size:16px;resize:none;"></textarea>
     </div>
   </div>
 </div>
@@ -161,6 +215,26 @@ function subscribe() {
     })
     .subscribe();
 }
+
+// ===================== DARK MODE =====================
+function toggleDarkMode() {
+  const on = document.getElementById('darkModeToggle').checked;
+  document.body.classList.toggle('dark', on);
+  localStorage.setItem('fridge-dark', on ? '1' : '0');
+  const track = document.getElementById('darkTrack');
+  const slider = document.getElementById('darkSlider');
+  if (on) { track.style.background = '#3b82f6'; slider.style.transform = 'translateX(24px)'; }
+  else { track.style.background = '#ccc'; slider.style.transform = ''; }
+}
+(function() {
+  if (localStorage.getItem('fridge-dark') === '1') {
+    document.body.classList.add('dark');
+    setTimeout(() => {
+      const cb = document.getElementById('darkModeToggle');
+      if (cb) { cb.checked = true; toggleDarkMode(); }
+    }, 100);
+  }
+})();
 
 // ===================== UI =====================
 const CATEGORIES = ['Viande','Legumes','Fruits','Produits laitiers','Boissons','Transforme','Epices','Autres'];
@@ -244,7 +318,7 @@ function render() {
 
   const container = document.getElementById('foodList');
   if (list.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:60px 0;color:#9ca3af;"><div style="font-size:48px;margin-bottom:12px;">🧊</div><p style="font-size:16px;">Le frigo est vide</p><p style="font-size:13px;">Ajoutez des aliments</p></div>';
+    container.innerHTML = '<div style="text-align:center;padding:60px 0;"><div style="font-size:48px;margin-bottom:12px;">🧊</div><p style="font-size:16px;" class="text-strong">Le frigo est vide</p><p style="font-size:13px;" class="text-muted">Ajoutez des aliments</p></div>';
     return;
   }
   container.innerHTML = list.map(f => {
@@ -254,15 +328,15 @@ function render() {
                   dDay === 0 ? { bg:'#ef4444', text:'Perime' } :
                   dDay <= 3 ? { bg:'#eab308', text:`J-${dDay}` } :
                   { bg:'#d1fae5', text:`J-${dDay}`, color:'#065f46' };
-    return `<div class="food-card" style="display:flex;align-items:center;gap:12px;background:white;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);border:1px solid #f3f4f6;">
+    return `<div class="food-card card-bg" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);border:1px solid;">
       <div style="font-size:28px;width:40px;text-align:center;">${CAT_ICONS[f.category]||'📦'}</div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-weight:600;color:#111827;font-size:16px;">${f.name}</span>
-          <span style="font-size:12px;color:#9ca3af;">${f.quantity}</span>
+          <span class="text-strong" style="font-weight:600;font-size:16px;">${f.name}</span>
+          <span style="font-size:12px;" class="text-muted">${f.quantity}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-          <span style="font-size:12px;color:#9ca3af;">${f.category}</span>
+          <span style="font-size:12px;" class="text-muted">${f.category}</span>
           <span style="font-size:10px;color:#e5e7eb;">|</span>
           <span style="font-size:12px;color:#6b7280;">+${daysIn}j</span>
         </div>
@@ -382,10 +456,14 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/fridge-mate
 </script>
 
 <style>
-.cat-btn { padding:6px 14px;border-radius:20px;border:none;font-size:13px;font-weight:500;background:#f3f4f6;color:#6b7280;cursor:pointer;white-space:nowrap;transition:all 0.15s; }
+.cat-btn { padding:6px 14px;border-radius:20px;border:none;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.15s; }
 .cat-btn.active { background:#3b82f6;color:white; }
-.cat-pick { padding:8px 16px;border-radius:20px;border:none;font-size:13px;font-weight:500;background:#f3f4f6;color:#6b7280;cursor:pointer;transition:all 0.15s; }
+body:not(.dark) .cat-btn:not(.active) { background:#f3f4f6;color:#6b7280; }
+body.dark .cat-btn:not(.active) { background:#1a1a2e;color:#8892b0;border:1px solid #0f3460; }
+.cat-pick { padding:8px 16px;border-radius:20px;border:none;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s; }
 .cat-pick.active { background:#3b82f6;color:white; }
+body:not(.dark) .cat-pick:not(.active) { background:#f3f4f6;color:#6b7280; }
+body.dark .cat-pick:not(.active) { background:#1a1a2e;color:#8892b0;border:1px solid #0f3460; }
 .food-card { animation:fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity:0;transform:translateY(4px); } to { opacity:1;transform:translateY(0); } }
 </style>
