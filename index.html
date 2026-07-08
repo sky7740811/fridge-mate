@@ -423,8 +423,9 @@ async function saveFood() {
 let selectedCategory = 'Autres';
 function initAddScreen() {
   document.getElementById('inputAdded').value = today();
-  document.getElementById('categoryPicker').innerHTML = CATEGORIES.map(c =>
-    `<button onclick="selectCat('${c}')" class="cat-pick ${c==='Autres'?'active':''}">${c}</button>`
+  const container = document.getElementById('categoryPicker');
+  container.innerHTML = CATEGORIES.map(c =>
+    `<button onclick="selectCat('${c}')" class="cat-pick ${c==='Autres'?'active':''}">${CAT_ICONS[c]||''} ${c}</button>`
   ).join('');
 }
 function selectCat(c) {
