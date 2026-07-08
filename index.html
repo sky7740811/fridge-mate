@@ -108,17 +108,25 @@ function daysBetween(a, b) {
   return Math.ceil((db - da) / (1000*60*60*24));
 }
 
-let foods = [
-  { id:'1', name:'Lait', qty:'2x', cat:'Produits laitiers', added:'2026-07-01', expires:'2026-07-12' },
-  { id:'2', name:'Oeufs', qty:'10', cat:'Produits laitiers', added:'2026-06-30', expires:'2026-07-15' },
-  { id:'3', name:'Chou', qty:'1', cat:'Legumes/Fruits', added:'2026-07-05', expires:'2026-07-10' },
-  { id:'4', name:'Poitrine porc', qty:'500g', cat:'Viande', added:'2026-07-06', expires:'2026-07-09' },
-  { id:'5', name:'Tofu', qty:'2', cat:'Transforme', added:'2026-07-03', expires:'2026-07-08' },
-  { id:'6', name:'Pommes', qty:'5', cat:'Legumes/Fruits', added:'2026-07-04', expires:'2026-07-18' },
-  { id:'7', name:'Yaourt', qty:'4', cat:'Produits laitiers', added:'2026-07-07', expires:'2026-07-14' },
-  { id:'8', name:'Eau', qty:'6 bouteilles', cat:'Boissons', added:'2026-07-02', expires:'2026-12-31' },
+const MOCK_FOODS = [
+  { id:'m1', name:'Lait', qty:'2x', cat:'Produits laitiers', added:'2026-07-01', expires:'2026-07-12' },
+  { id:'m2', name:'Oeufs', qty:'10', cat:'Produits laitiers', added:'2026-06-30', expires:'2026-07-15' },
+  { id:'m3', name:'Chou', qty:'1', cat:'Legumes/Fruits', added:'2026-07-05', expires:'2026-07-10' },
+  { id:'m4', name:'Poitrine porc', qty:'500g', cat:'Viande', added:'2026-07-06', expires:'2026-07-09' },
+  { id:'m5', name:'Tofu', qty:'2', cat:'Transforme', added:'2026-07-03', expires:'2026-07-08' },
+  { id:'m6', name:'Pommes', qty:'5', cat:'Legumes/Fruits', added:'2026-07-04', expires:'2026-07-18' },
+  { id:'m7', name:'Yaourt', qty:'4', cat:'Produits laitiers', added:'2026-07-07', expires:'2026-07-14' },
+  { id:'m8', name:'Eau', qty:'6 bouteilles', cat:'Boissons', added:'2026-07-02', expires:'2026-12-31' },
 ];
-let nextId = 100;
+function loadFoods() {
+  try { const s = localStorage.getItem('fridge-foods'); if (s) return JSON.parse(s); } catch(e) {}
+  return [...MOCK_FOODS];
+}
+function saveFoods() {
+  try { localStorage.setItem('fridge-foods', JSON.stringify(foods)); } catch(e) {}
+}
+let foods = loadFoods();
+let nextId = Date.now();
 let currentFilter = 'Tous';
 
 function render() {
@@ -178,6 +186,7 @@ function setFilter(cat) {
 function deleteFood(id) {
   if (!confirm('Supprimer ?')) return;
   foods = foods.filter(f => f.id !== id);
+  saveFoods();
   render();
 }
 
@@ -208,6 +217,7 @@ function saveFood() {
     expires,
     notes: document.getElementById('inputNotes').value,
   });
+  saveFoods();
 
   document.getElementById('inputName').value = '';
   document.getElementById('inputQty').value = '1';
