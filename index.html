@@ -122,7 +122,7 @@ body.dark select, body.dark input, body.dark textarea { background: #1a1a2e; col
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Nom</label>
       <div style="position:relative;">
         <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onNameInput()" autocomplete="off" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
-        <div id="nameDropdown" style="display:none;position:absolute;z-index:50;background:white;border:1px solid #e5e7eb;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
+        <div id="nameDropdown" class="bg-white border-gray-100" style="display:none;position:absolute;z-index:50;border:1px solid;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
       </div>
     </div>
     <div>
@@ -173,21 +173,30 @@ let currentFilter = 'Tous';
 
 // ===================== AUTO LOGIN =====================
 (async () => {
-  // Try existing session first
-  const { data } = await _sb.auth.getSession();
-  if (!data.session) {
-    // Auto-login with shared account
-    await _sb.auth.signInWithPassword({ email: 'fridge@family.app', password: 'fridge123' });
+  try {
+    const { data } = await _sb.auth.getSession();
+    if (!data.session) {
+      const { error } = await _sb.auth.signInWithPassword({ email: 'fridge@family.app', password: 'fridge123' });
+      if (error) console.error('Login failed:', error.message);
+    }
+  } catch(e) {
+    console.error('Login error:', e);
   }
-  // Wait briefly then load
-  setTimeout(() => { showScreen('mainScreen'); loadFoods(); subscribe(); }, 500);
+  // Retry load a few times in case session isn't ready
+  setTimeout(() => { showScreen('mainScreen'); loadFoods(); subscribe(); }, 800);
 })();
 
 // ===================== LOAD & SYNC =====================
 async function loadFoods() {
   if (!currentFamilyId) return;
-  const { data } = await _sb.from('foods').select('*').eq('family_id', currentFamilyId).order('expires_at', { ascending: true });
-  foods = data || [];
+  try {
+    const { data, error } = await _sb.from('foods').select('*').eq('family_id', currentFamilyId).order('expires_at', { ascending: true });
+    if (error) throw error;
+    foods = data || [];
+  } catch(e) {
+    console.error('loadFoods error:', e);
+    foods = [];
+  }
   render();
 }
 
@@ -373,9 +382,9 @@ function onNameInput() {
   const matches = PRODUCT_DB.filter(p => p.n.toLowerCase().includes(val)).slice(0, 12);
   if (matches.length === 0) { dd.style.display = 'none'; checkForm(); return; }
   dd.innerHTML = matches.map((p, i) =>
-    `<div onclick="selectProduct(${i})" style="padding:12px 14px;font-size:15px;border-bottom:1px solid #f3f4f6;cursor:pointer;display:flex;justify-content:space-between;">
+    `<div onclick="selectProduct(${i})" class="text-gray-900 border-gray-100" style="padding:12px 14px;font-size:15px;border-bottom:1px solid;cursor:pointer;display:flex;justify-content:space-between;">
       <span>${p.n}</span>
-      <span style="color:#9ca3af;font-size:12px;">${CAT_ICONS[p.c]||''} ${p.c}</span>
+      <span class="text-gray-500" style="font-size:12px;">${CAT_ICONS[p.c]||''} ${p.c}</span>
     </div>`
   ).join('');
   dd.style.display = 'block';
@@ -392,7 +401,10 @@ function calcExpiry(shelfDays) {
 
 function selectProduct(idx) {
   const items = document.getElementById('nameDropdown').children;
-  const match = PRODUCT_DB.find(p => p.n === items[idx].textContent.trim().split(' ')[0]);
+  if (!items[idx]) return;
+  const nameSpan = items[idx].querySelector('span:first-child');
+  if (!nameSpan) return;
+  const match = PRODUCT_DB.find(p => p.n === nameSpan.textContent.trim());
   if (!match) return;
   document.getElementById('inputName').value = match.n;
   document.getElementById('inputExpires').value = calcExpiry(match.s);
