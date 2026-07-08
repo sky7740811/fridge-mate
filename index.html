@@ -19,8 +19,8 @@ body:not(.dark) { background: #f9fafb; color: inherit; }
 input, select, textarea { font-size: 16px; }
 body.dark .card-bg { background: #16213e; border-color: #0f3460; color: #e0e0e0; }
 body:not(.dark) .card-bg { background: white; border-color: #f3f4f6; color: inherit; }
-body.dark .header-bg { background: #16213e; border-color: #0f3460; }
-body:not(.dark) .header-bg { background: white; border-color: #f3f4f6; }
+body.dark .header-bg { background: #16213e; border-bottom-color: #0f3460; }
+body:not(.dark) .header-bg { background: white; border-bottom-color: #f3f4f6; }
 body.dark .input-bg { background: #1a1a2e; border-color: #0f3460; color: #e0e0e0; }
 body:not(.dark) .input-bg { background: white; border-color: #e5e7eb; color: inherit; }
 body.dark .text-muted { color: #8892b0; }
@@ -33,8 +33,8 @@ body.dark .stat-bg-yellow { background: #1e3a1e; }
 body:not(.dark) .stat-bg-yellow { background: #fefce8; }
 body.dark .stat-bg-red { background: #3d1a1a; }
 body:not(.dark) .stat-bg-red { background: #fef2f2; }
-body.dark .nav-bg { background: #16213e; border-color: #0f3460; }
-body:not(.dark) .nav-bg { background: white; border-color: #f3f4f6; }
+body.dark .nav-bg { background: #16213e; border-top-color: #0f3460; }
+body:not(.dark) .nav-bg { background: white; border-top-color: #f3f4f6; }
 body.dark .filter-bg { background: #1a1a2e; color: #8892b0; }
 body:not(.dark) .filter-bg { background: #f3f4f6; color: #6b7280; }
 </style>
@@ -328,7 +328,7 @@ function render() {
                   dDay === 0 ? { bg:'#ef4444', text:'Perime' } :
                   dDay <= 3 ? { bg:'#eab308', text:`J-${dDay}` } :
                   { bg:'#d1fae5', text:`J-${dDay}`, color:'#065f46' };
-    return `<div class="food-card card-bg" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);border:1px solid;">
+    return `<div class="food-card card-bg" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
       <div style="font-size:28px;width:40px;text-align:center;">${CAT_ICONS[f.category]||'📦'}</div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;">
