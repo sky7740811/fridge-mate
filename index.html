@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FridgeMate">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; }
@@ -18,18 +19,60 @@ input, select, textarea { font-size: 16px; }
 </head>
 <body>
 
+<!-- ==================== AUTH SCREEN ==================== -->
+<div id="authScreen" class="screen" style="justify-content:center;align-items:center;background:linear-gradient(135deg,#eff6ff,#e0e7ff);padding:24px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <div style="font-size:64px;margin-bottom:12px;">🧊</div>
+    <h1 style="font-size:28px;font-weight:800;color:#1f2937;">Fridge Mate</h1>
+    <p style="color:#6b7280;font-size:14px;margin-top:4px;">Notre frigo partage</p>
+  </div>
+  <form id="authForm" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;">
+    <input id="authEmail" type="email" placeholder="Email" required style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+    <input id="authPw" type="password" placeholder="Mot de passe" required style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+    <button id="authBtn" type="submit" style="width:100%;padding:14px;border-radius:12px;border:none;background:#3b82f6;color:white;font-size:16px;font-weight:600;">Se connecter</button>
+    <p style="text-align:center;color:#9ca3af;font-size:13px;">
+      Pas de compte ? <a href="#" onclick="toggleAuthMode()" style="color:#3b82f6;text-decoration:none;font-weight:500;">S'inscrire</a>
+    </p>
+    <p id="authError" style="text-align:center;color:#ef4444;font-size:13px;display:none;"></p>
+  </form>
+</div>
+
+<!-- ==================== FAMILY SCREEN ==================== -->
+<div id="familyScreen" class="screen" style="justify-content:center;align-items:center;background:#f9fafb;padding:24px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <div style="font-size:64px;margin-bottom:12px;">👨‍👩‍👧‍👦</div>
+    <h1 style="font-size:24px;font-weight:700;color:#1f2937;">Bienvenue !</h1>
+    <p id="familyDesc" style="color:#6b7280;font-size:14px;margin-top:4px;"></p>
+  </div>
+  <div id="familyActions" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;">
+    <div id="newFamilyBox" style="background:white;border-radius:16px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.05);text-align:center;">
+      <p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Creez un frigo et invitez votre partenaire</p>
+      <button onclick="createFamily()" style="width:100%;padding:14px;border-radius:12px;border:none;background:#3b82f6;color:white;font-size:16px;font-weight:600;">Creer mon frigo</button>
+    </div>
+    <div style="text-align:center;color:#d1d5db;font-size:13px;">ou</div>
+    <div id="joinBox" style="background:white;border-radius:16px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.05);text-align:center;">
+      <p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Vous avez un code d'invitation ?</p>
+      <input id="inviteCode" placeholder="Code a 6 chiffres" maxlength="6" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;text-align:center;letter-spacing:6px;margin-bottom:12px;">
+      <button onclick="joinFamily()" style="width:100%;padding:14px;border-radius:12px;border:none;background:#10b981;color:white;font-size:16px;font-weight:600;">Rejoindre</button>
+    </div>
+  </div>
+  <p id="familyError" style="text-align:center;color:#ef4444;font-size:13px;margin-top:16px;display:none;"></p>
+</div>
+
 <!-- ==================== MAIN SCREEN ==================== -->
-<div id="mainScreen" class="screen active">
+<div id="mainScreen" class="screen">
   <div style="background:white;padding:48px 20px 16px;border-bottom:1px solid #f3f4f6;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h1 style="font-size:22px;font-weight:700;color:#111827;">🧊 Mon Frigo</h1>
         <p id="currentDate" style="font-size:13px;color:#9ca3af;margin-top:2px;"></p>
       </div>
-      <span style="font-size:24px;color:#9ca3af;">👤</span>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <span style="font-size:12px;color:#9ca3af;" id="familyBadge"></span>
+        <button onclick="logout()" style="border:none;background:none;color:#9ca3af;font-size:14px;cursor:pointer;">🚪</button>
+      </div>
     </div>
   </div>
-
   <div style="display:flex;gap:8px;padding:12px 20px;background:white;border-bottom:1px solid #f9fafb;">
     <div style="flex:1;background:#eff6ff;border-radius:12px;padding:10px;text-align:center;">
       <div id="statTotal" style="font-size:20px;font-weight:700;color:#2563eb;">0</div>
@@ -44,15 +87,11 @@ input, select, textarea { font-size: 16px; }
       <div style="font-size:11px;color:#f87171;">Expire</div>
     </div>
   </div>
-
   <div id="categoryFilter" style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto;background:white;border-bottom:1px solid #f9fafb;"></div>
-
   <div id="foodList" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"></div>
-
   <div style="position:fixed;bottom:72px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;">
     <button onclick="showScreen('addScreen')" style="pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:#3b82f6;color:white;font-size:28px;box-shadow:0 4px 14px rgba(59,130,246,0.4);cursor:pointer;">+</button>
   </div>
-
   <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #f3f4f6;padding:6px 20px 20px;">
     <div style="display:flex;justify-content:space-around;text-align:center;">
       <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#3b82f6;">Accueil</div></div>
@@ -103,6 +142,153 @@ input, select, textarea { font-size: 16px; }
 </div>
 
 <script>
+// ===================== SUPABASE =====================
+const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
+const { createClient } = supabase;
+const _sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentFamilyId = null;
+let foods = [];
+let currentFilter = 'Tous';
+let isLoginMode = true;
+
+// ===================== AUTH =====================
+_sb.auth.onAuthStateChange((event, session) => {
+  if (session) { currentUser = session.user; afterLogin(); }
+  else { currentUser = null; currentFamilyId = null; showScreen('authScreen'); }
+});
+
+document.getElementById('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value;
+  const pw = document.getElementById('authPw').value;
+  const btn = document.getElementById('authBtn');
+  const errEl = document.getElementById('authError');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = '...';
+
+  try {
+    if (isLoginMode) {
+      const { error } = await _sb.auth.signInWithPassword({ email, password: pw });
+      if (error) throw error;
+    } else {
+      const { error } = await _sb.auth.signUp({ email, password: pw });
+      if (error) throw error;
+      errEl.style.color = '#10b981';
+      errEl.textContent = 'Compte cree ! Verifiez vos emails.';
+      errEl.style.display = 'block';
+      isLoginMode = true;
+      document.getElementById('authBtn').textContent = 'Se connecter';
+      document.getElementById('authToggle').textContent = "S'inscrire";
+      btn.disabled = false; btn.textContent = 'Se connecter';
+      toggleAuthMode();
+      return;
+    }
+  } catch (err) {
+    errEl.style.color = '#ef4444';
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = isLoginMode ? 'Se connecter' : "S'inscrire";
+});
+
+function toggleAuthMode() {
+  isLoginMode = !isLoginMode;
+  document.getElementById('authBtn').textContent = isLoginMode ? 'Se connecter' : "S'inscrire";
+  document.querySelector('#authForm a').textContent = isLoginMode ? "S'inscrire" : 'Se connecter';
+  document.getElementById('authError').style.display = 'none';
+}
+
+// ===================== FAMILY =====================
+async function afterLogin() {
+  // Check if user is in a family
+  const { data: memberships } = await _sb.from('family_members').select('family_id').eq('user_id', currentUser.id);
+  if (memberships && memberships.length > 0) {
+    currentFamilyId = memberships[0].family_id;
+    initApp();
+  } else {
+    showScreen('familyScreen');
+    document.getElementById('familyDesc').textContent = `Bonjour ${currentUser.email} !`;
+  }
+}
+
+async function createFamily() {
+  const { data: family, error } = await _sb.from('families').insert({
+    name: 'Notre Frigo',
+    invite_code: String(Math.floor(100000 + Math.random() * 900000))
+  }).select().single();
+  if (error) { showError(error.message); return; }
+
+  await _sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id, role: 'owner' });
+  currentFamilyId = family.id;
+  initApp();
+}
+
+async function joinFamily() {
+  const code = document.getElementById('inviteCode').value.trim();
+  if (!code || code.length !== 6) { showError('Code a 6 chiffres requis'); return; }
+  const { data: family } = await _sb.from('families').select('id').eq('invite_code', code).maybeSingle();
+  if (!family) { showError('Code invalide'); return; }
+  const { error } = await _sb.from('family_members').insert({ family_id: family.id, user_id: currentUser.id });
+  if (error) { showError(error.message); return; }
+  currentFamilyId = family.id;
+  initApp();
+}
+
+function showError(msg) {
+  const el = document.getElementById('familyError');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+function logout() {
+  _sb.auth.signOut();
+  foods = [];
+  render();
+}
+
+// ===================== DATA =====================
+async function loadFoods() {
+  if (!currentFamilyId) return;
+  const { data } = await _sb.from('foods').select('*').eq('family_id', currentFamilyId).order('expires_at', { ascending: true });
+  foods = data || [];
+  render();
+}
+
+async function addFood(item) {
+  const { data, error } = await _sb.from('foods').insert({
+    family_id: currentFamilyId,
+    name: item.name,
+    quantity: item.qty,
+    category: item.cat,
+    added_at: item.added,
+    expires_at: item.expires,
+    notes: item.notes || '',
+    added_by: currentUser.id,
+  }).select().single();
+  if (!error && data) { foods.push(data); render(); }
+  return error;
+}
+
+async function deleteFood(id) {
+  if (!confirm('Supprimer ?')) return;
+  await _sb.from('foods').delete().eq('id', id);
+  foods = foods.filter(f => f.id !== id);
+  render();
+}
+
+// ===================== REALTIME =====================
+function subscribe() {
+  const channel = _sb.channel('foods-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'foods', filter: `family_id=eq.${currentFamilyId}` }, () => {
+      loadFoods();
+    })
+    .subscribe();
+}
+
+// ===================== UI =====================
 const CATEGORIES = ['Viande','Legumes','Fruits','Produits laitiers','Boissons','Transforme','Epices','Autres'];
 const CAT_ICONS = { 'Viande':'🥩','Legumes':'🥬','Fruits':'🍎','Produits laitiers':'🧀','Boissons':'🥤','Transforme':'🥫','Epices':'🧂','Autres':'📦' };
 
@@ -122,66 +308,39 @@ const PRODUCT_DB = [
   {n:'Moutarde',c:'Epices',s:365},{n:'Sel',c:'Epices',s:365},{n:'Poivre',c:'Epices',s:365},{n:'Sucre',c:'Epices',s:365},
   {n:'Huile olive',c:'Epices',s:365},{n:'Vinaigre',c:'Epices',s:365},{n:'Farine',c:'Transforme',s:180},{n:'Riz',c:'Transforme',s:365},
   {n:'Pâtes',c:'Transforme',s:365},{n:'Céréales',c:'Transforme',s:180},{n:'Pain',c:'Transforme',s:5},{n:'Chocolat',c:'Transforme',s:180},
-  {n:'Confiture',c:'Transforme',s:180},{n:'Miel',c:'Transforme',s:365},
-  {n:'Kimchi',c:'Transforme',s:60},{n:'Sauce soja',c:'Epices',s:365},{n:'Huile sesame',c:'Epices',s:365},
-  {n:'Gochujang',c:'Epices',s:180},{n:'Nouilles',c:'Transforme',s:365},{n:'Ramen',c:'Transforme',s:365},
-  {n:'Sushi',c:'Transforme',s:2},{n:'Saumon',c:'Viande',s:2},{n:'Crevettes',c:'Viande',s:2},
-  {n:'Bacon',c:'Viande',s:7},{n:'Saucisse',c:'Viande',s:7},{n:'Steak',c:'Viande',s:3},
-  {n:'Porc',c:'Viande',s:3},{n:'Agneau',c:'Viande',s:3},{n:'Canard',c:'Viande',s:3},
-  {n:'Dinde',c:'Viande',s:3},{n:'Cake',c:'Transforme',s:7},{n:'Croissant',c:'Transforme',s:3},
-  {n:'Baguette',c:'Transforme',s:3},{n:'Pain complet',c:'Transforme',s:7},
-  {n:'Epinard',c:'Legumes',s:5},{n:'Haricot vert',c:'Legumes',s:7},{n:'Petit pois',c:'Legumes',s:7},
-  {n:'Maïs',c:'Legumes',s:7},{n:'Betterave',c:'Legumes',s:14},{n:'Radis',c:'Legumes',s:7},
-  {n:'Celeri',c:'Legumes',s:14},{n:'Asperge',c:'Legumes',s:5},{n:'Avocat',c:'Fruits',s:4},
-  {n:'Mangue',c:'Fruits',s:5},{n:'Ananas',c:'Fruits',s:7},{n:'Kiwi',c:'Fruits',s:7},
-  {n:'Pêche',c:'Fruits',s:5},{n:'Abricot',c:'Fruits',s:5},{n:'Cerise',c:'Fruits',s:3},
-  {n:'Framboise',c:'Fruits',s:3},{n:'Myrtille',c:'Fruits',s:5},{n:'Melon',c:'Fruits',s:7},
-  {n:'Pastèque',c:'Fruits',s:7},{n:'Raisin',c:'Fruits',s:5},{n:'Clémentine',c:'Fruits',s:14},
-  {n:'Limonade',c:'Boissons',s:30},{n:'Thé',c:'Boissons',s:365},{n:'Café',c:'Boissons',s:365},
-  {n:'Eau gazeuse',c:'Boissons',s:365},{n:'Lait ribot',c:'Produits laitiers',s:14},
-  {n:'Crème dessert',c:'Produits laitiers',s:14},{n:'Petit suisse',c:'Produits laitiers',s:14},
-  {n:'Mozzarella',c:'Produits laitiers',s:10},{n:'Parmesan',c:'Produits laitiers',s:60},
-  {n:'Camembert',c:'Produits laitiers',s:21},{n:'Comté',c:'Produits laitiers',s:60},
-  {n:'Chèvre',c:'Produits laitiers',s:14},{n:'Roquefort',c:'Produits laitiers',s:30},
-  {n:'Feta',c:'Produits laitiers',s:30},{n:'Crème glace',c:'Produits laitiers',s:60},
+  {n:'Confiture',c:'Transforme',s:180},{n:'Miel',c:'Transforme',s:365},{n:'Kimchi',c:'Transforme',s:60},{n:'Sauce soja',c:'Epices',s:365},
+  {n:'Huile sesame',c:'Epices',s:365},{n:'Gochujang',c:'Epices',s:180},{n:'Nouilles',c:'Transforme',s:365},{n:'Ramen',c:'Transforme',s:365},
+  {n:'Sushi',c:'Transforme',s:2},{n:'Saumon',c:'Viande',s:2},{n:'Crevettes',c:'Viande',s:2},{n:'Bacon',c:'Viande',s:7},
+  {n:'Steak',c:'Viande',s:3},{n:'Agneau',c:'Viande',s:3},{n:'Canard',c:'Viande',s:3},{n:'Dinde',c:'Viande',s:3},
+  {n:'Cake',c:'Transforme',s:7},{n:'Croissant',c:'Transforme',s:3},{n:'Baguette',c:'Transforme',s:3},{n:'Pain complet',c:'Transforme',s:7},
+  {n:'Epinard',c:'Legumes',s:5},{n:'Haricot vert',c:'Legumes',s:7},{n:'Petit pois',c:'Legumes',s:7},{n:'Maïs',c:'Legumes',s:7},
+  {n:'Betterave',c:'Legumes',s:14},{n:'Radis',c:'Legumes',s:7},{n:'Celeri',c:'Legumes',s:14},{n:'Asperge',c:'Legumes',s:5},
+  {n:'Mangue',c:'Fruits',s:5},{n:'Ananas',c:'Fruits',s:7},{n:'Kiwi',c:'Fruits',s:7},{n:'Pêche',c:'Fruits',s:5},
+  {n:'Abricot',c:'Fruits',s:5},{n:'Cerise',c:'Fruits',s:3},{n:'Framboise',c:'Fruits',s:3},{n:'Myrtille',c:'Fruits',s:5},
+  {n:'Melon',c:'Fruits',s:7},{n:'Pastèque',c:'Fruits',s:7},{n:'Clémentine',c:'Fruits',s:14},{n:'Limonade',c:'Boissons',s:30},
+  {n:'Thé',c:'Boissons',s:365},{n:'Café',c:'Boissons',s:365},{n:'Eau gazeuse',c:'Boissons',s:365},{n:'Lait ribot',c:'Produits laitiers',s:14},
+  {n:'Crème dessert',c:'Produits laitiers',s:14},{n:'Petit suisse',c:'Produits laitiers',s:14},{n:'Mozzarella',c:'Produits laitiers',s:10},
+  {n:'Parmesan',c:'Produits laitiers',s:60},{n:'Camembert',c:'Produits laitiers',s:21},{n:'Comté',c:'Produits laitiers',s:60},
+  {n:'Chèvre',c:'Produits laitiers',s:14},{n:'Roquefort',c:'Produits laitiers',s:30},{n:'Feta',c:'Produits laitiers',s:30},
+  {n:'Crème glace',c:'Produits laitiers',s:60},
 ];
 
 const today = () => new Date().toISOString().split('T')[0];
-
 function daysBetween(a, b) {
   const da = new Date(a); da.setHours(0,0,0,0);
   const db = new Date(b); db.setHours(0,0,0,0);
   return Math.ceil((db - da) / (1000*60*60*24));
 }
 
-const MOCK_FOODS = [
-  { id:'m1', name:'Lait', qty:'2x', cat:'Produits laitiers', added:'2026-07-01', expires:'2026-07-12' },
-  { id:'m2', name:'Oeufs', qty:'10', cat:'Produits laitiers', added:'2026-06-30', expires:'2026-07-15' },
-  { id:'m3', name:'Chou', qty:'1', cat:'Legumes', added:'2026-07-05', expires:'2026-07-10' },
-  { id:'m4', name:'Poitrine porc', qty:'500g', cat:'Viande', added:'2026-07-06', expires:'2026-07-09' },
-  { id:'m5', name:'Tofu', qty:'2', cat:'Transforme', added:'2026-07-03', expires:'2026-07-08' },
-  { id:'m6', name:'Pommes', qty:'5', cat:'Fruits', added:'2026-07-04', expires:'2026-07-18' },
-  { id:'m7', name:'Yaourt', qty:'4', cat:'Produits laitiers', added:'2026-07-07', expires:'2026-07-14' },
-  { id:'m8', name:'Eau', qty:'6 bouteilles', cat:'Boissons', added:'2026-07-02', expires:'2026-12-31' },
-];
-function loadFoods() {
-  try { const s = localStorage.getItem('fridge-foods'); if (s) return JSON.parse(s); } catch(e) {}
-  return [...MOCK_FOODS];
-}
-function saveFoods() {
-  try { localStorage.setItem('fridge-foods', JSON.stringify(foods)); } catch(e) {}
-}
-let foods = loadFoods();
-let nextId = Date.now();
-let currentFilter = 'Tous';
-
 function render() {
+  if (!currentFamilyId) return;
   const now = new Date();
   document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('familyBadge').textContent = '👨‍👩‍👧‍👦';
 
   const total = foods.length;
-  const soon = foods.filter(f => { const d = daysBetween(now.toISOString().split('T')[0], f.expires); return d >= 0 && d <= 3; }).length;
-  const expired = foods.filter(f => daysBetween(now.toISOString().split('T')[0], f.expires) < 0).length;
+  const soon = foods.filter(f => { const d = daysBetween(now.toISOString().split('T')[0], f.expires_at); return d >= 0 && d <= 3; }).length;
+  const expired = foods.filter(f => daysBetween(now.toISOString().split('T')[0], f.expires_at) < 0).length;
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statSoon').textContent = soon;
   document.getElementById('statExpired').textContent = expired;
@@ -190,8 +349,8 @@ function render() {
   catContainer.innerHTML = '<button onclick="setFilter(\'Tous\')" class="cat-btn ' + (currentFilter==='Tous'?'active':'') + '">Tous</button>' +
     CATEGORIES.map(c => '<button onclick="setFilter(\''+c+'\')" class="cat-btn ' + (currentFilter===c?'active':'') + '">'+(CAT_ICONS[c]||'')+' '+c+'</button>').join('');
 
-  let list = currentFilter === 'Tous' ? [...foods] : foods.filter(f => f.cat === currentFilter);
-  list.sort((a,b) => new Date(a.expires) - new Date(b.expires));
+  let list = currentFilter === 'Tous' ? [...foods] : foods.filter(f => f.category === currentFilter);
+  list.sort((a,b) => new Date(a.expires_at) - new Date(b.expires_at));
 
   const container = document.getElementById('foodList');
   if (list.length === 0) {
@@ -199,21 +358,21 @@ function render() {
     return;
   }
   container.innerHTML = list.map(f => {
-    const daysIn = daysBetween(f.added, now.toISOString().split('T')[0]);
-    const dDay = daysBetween(now.toISOString().split('T')[0], f.expires);
+    const daysIn = daysBetween(f.added_at, now.toISOString().split('T')[0]);
+    const dDay = daysBetween(now.toISOString().split('T')[0], f.expires_at);
     const badge = dDay < 0 ? { bg:'#ef4444', text:`J${dDay}` } :
                   dDay === 0 ? { bg:'#ef4444', text:'Perime' } :
                   dDay <= 3 ? { bg:'#eab308', text:`J-${dDay}` } :
                   { bg:'#d1fae5', text:`J-${dDay}`, color:'#065f46' };
     return `<div class="food-card" style="display:flex;align-items:center;gap:12px;background:white;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);border:1px solid #f3f4f6;">
-      <div style="font-size:28px;width:40px;text-align:center;">${CAT_ICONS[f.cat]||'📦'}</div>
+      <div style="font-size:28px;width:40px;text-align:center;">${CAT_ICONS[f.category]||'📦'}</div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-weight:600;color:#111827;font-size:16px;">${f.name}</span>
-          <span style="font-size:12px;color:#9ca3af;">${f.qty}</span>
+          <span style="font-size:12px;color:#9ca3af;">${f.quantity}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-          <span style="font-size:12px;color:#9ca3af;">${f.cat}</span>
+          <span style="font-size:12px;color:#9ca3af;">${f.category}</span>
           <span style="font-size:10px;color:#e5e7eb;">|</span>
           <span style="font-size:12px;color:#6b7280;">+${daysIn}j</span>
         </div>
@@ -224,60 +383,30 @@ function render() {
   }).join('');
 }
 
-function setFilter(cat) {
-  currentFilter = cat;
-  render();
-}
-
-function deleteFood(id) {
-  if (!confirm('Supprimer ?')) return;
-  foods = foods.filter(f => f.id !== id);
-  saveFoods();
-  render();
-}
-
-let _selIdx = -1;
+function setFilter(cat) { currentFilter = cat; render(); }
 
 function onNameInput() {
   const el = document.getElementById('inputName');
   const val = el.value.trim().toLowerCase();
   const dd = document.getElementById('nameDropdown');
-
   if (!val) { dd.style.display = 'none'; checkForm(); return; }
-
-  // Filter products
-  const matches = PRODUCT_DB.filter(p =>
-    p.n.toLowerCase().includes(val)
-  ).slice(0, 12);
-
-  if (matches.length === 0) {
-    dd.style.display = 'none';
-    checkForm();
-    return;
-  }
-
-  _selIdx = -1;
+  const matches = PRODUCT_DB.filter(p => p.n.toLowerCase().includes(val)).slice(0, 12);
+  if (matches.length === 0) { dd.style.display = 'none'; checkForm(); return; }
   dd.innerHTML = matches.map((p, i) =>
-    `<div onclick="selectProduct(${i})" data-idx="${i}" style="padding:12px 14px;font-size:15px;border-bottom:1px solid #f3f4f6;cursor:pointer;display:flex;justify-content:space-between;">
+    `<div onclick="selectProduct(${i})" style="padding:12px 14px;font-size:15px;border-bottom:1px solid #f3f4f6;cursor:pointer;display:flex;justify-content:space-between;">
       <span>${p.n}</span>
       <span style="color:#9ca3af;font-size:12px;">${CAT_ICONS[p.c]||''} ${p.c}</span>
     </div>`
   ).join('');
   dd.style.display = 'block';
-
-  // Auto-select if exact match
   const exact = PRODUCT_DB.find(p => p.n.toLowerCase() === val);
-  if (exact) {
-    document.getElementById('inputExpires').value = calcExpiry(exact.s);
-    selectCat(exact.c);
-  }
+  if (exact) { document.getElementById('inputExpires').value = calcExpiry(exact.s); selectCat(exact.c); }
   checkForm();
 }
 
 function calcExpiry(shelfDays) {
   const added = document.getElementById('inputAdded').value || today();
-  const d = new Date(added);
-  d.setDate(d.getDate() + shelfDays);
+  const d = new Date(added); d.setDate(d.getDate() + shelfDays);
   return d.toISOString().split('T')[0];
 }
 
@@ -292,49 +421,31 @@ function selectProduct(idx) {
   checkForm();
 }
 
-// Hide dropdown on click outside
 document.addEventListener('click', function(e) {
   const dd = document.getElementById('nameDropdown');
   const inp = document.getElementById('inputName');
-  if (dd && inp && !inp.contains(e.target) && !dd.contains(e.target)) {
-    dd.style.display = 'none';
-  }
+  if (dd && inp && !inp.contains(e.target) && !dd.contains(e.target)) dd.style.display = 'none';
 });
 
 function checkForm() {
   const name = document.getElementById('inputName').value.trim();
-  const btn = document.getElementById('saveBtn');
-  if (name) {
-    btn.disabled = false;
-    btn.style.color = '#3b82f6';
-  } else {
-    btn.disabled = true;
-    btn.style.color = '#d1d5db';
-  }
+  document.getElementById('saveBtn').disabled = !name;
+  document.getElementById('saveBtn').style.color = name ? '#3b82f6' : '#d1d5db';
 }
 
-function saveFood() {
+async function saveFood() {
   const name = document.getElementById('inputName').value.trim();
-  let expires = document.getElementById('inputExpires').value;
   if (!name) return;
-
-  // Auto-fill expiry if not set
+  let expires = document.getElementById('inputExpires').value;
   if (!expires) {
     const match = PRODUCT_DB.find(p => p.n.toLowerCase() === name.toLowerCase());
     expires = calcExpiry(match ? match.s : 7);
   }
-
-  foods.push({
-    id: String(nextId++),
-    name,
-    qty: document.getElementById('inputQty').value || '1',
-    cat: selectedCategory,
-    added: document.getElementById('inputAdded').value || today(),
-    expires,
-    notes: document.getElementById('inputNotes').value,
+  await addFood({
+    name, qty: document.getElementById('inputQty').value || '1',
+    cat: selectedCategory, added: document.getElementById('inputAdded').value || today(),
+    expires, notes: document.getElementById('inputNotes').value,
   });
-  saveFoods();
-
   document.getElementById('inputName').value = '';
   document.getElementById('inputQty').value = '1';
   document.getElementById('inputAdded').value = today();
@@ -342,24 +453,19 @@ function saveFood() {
   document.getElementById('inputNotes').value = '';
   selectedCategory = 'Autres';
   checkForm();
-
   showScreen('mainScreen');
-  render();
 }
 
 let selectedCategory = 'Autres';
 function initAddScreen() {
   document.getElementById('inputAdded').value = today();
-  const container = document.getElementById('categoryPicker');
-  container.innerHTML = CATEGORIES.map(c =>
+  document.getElementById('categoryPicker').innerHTML = CATEGORIES.map(c =>
     `<button onclick="selectCat('${c}')" class="cat-pick ${c==='Autres'?'active':''}">${c}</button>`
   ).join('');
 }
 function selectCat(c) {
   selectedCategory = c;
-  document.querySelectorAll('.cat-pick').forEach(el => {
-    el.classList.toggle('active', el.textContent === c);
-  });
+  document.querySelectorAll('.cat-pick').forEach(el => el.classList.toggle('active', el.textContent === c));
 }
 
 function showScreen(id) {
@@ -368,86 +474,30 @@ function showScreen(id) {
   if (id === 'addScreen') initAddScreen();
 }
 
-render();
-initAddScreen();
-
-// PWA: register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/fridge-mate/sw.js');
+function initApp() {
+  showScreen('mainScreen');
+  loadFoods();
+  subscribe();
 }
 
-// Notifications: check expiring items
-function checkNotifications() {
-  if (!('Notification' in window) || Notification.permission === 'denied') return;
+// ===================== PWA =====================
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/fridge-mate/sw.js');
 
-  if (Notification.permission === 'granted') {
-    const now = new Date().toISOString().split('T')[0];
-    const expiring = foods.filter(f => {
-      const d = daysBetween(now, f.expires);
-      return d >= 0 && d <= 3;
-    });
-    const expired = foods.filter(f => daysBetween(now, f.expires) < 0);
-
-    if (expired.length > 0) {
-      new Notification('Fridge Mate - Aliments perimes', {
-        body: expired.map(f => `${f.name} (${f.qty})`).join(', '),
-        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><text y=".9em" font-size="90">🧊</text></svg>'
-      });
-    } else if (expiring.length > 0) {
-      new Notification('Fridge Mate - Bientot expire', {
-        body: expiring.map(f => `${f.name} - J-${daysBetween(now, f.expires)}`).join(', '),
-        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><text y=".9em" font-size="90">🧊</text></svg>'
-      });
-    }
-  } else {
-    Notification.requestPermission();
-  }
-}
-
-// Check on load + every hour
-setTimeout(checkNotifications, 3000);
-setInterval(checkNotifications, 3600000);
+// ===================== CHECK SESSION =====================
+(async () => {
+  const { data } = await _sb.auth.getSession();
+  if (data.session) { currentUser = data.session.user; afterLogin(); }
+  else showScreen('authScreen');
+})();
 </script>
 
 <style>
-.cat-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: none;
-  font-size: 13px;
-  font-weight: 500;
-  background: #f3f4f6;
-  color: #6b7280;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-.cat-btn.active {
-  background: #3b82f6;
-  color: white;
-}
-.cat-pick {
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: none;
-  font-size: 13px;
-  font-weight: 500;
-  background: #f3f4f6;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.cat-pick.active {
-  background: #3b82f6;
-  color: white;
-}
-.food-card {
-  animation: fadeIn 0.2s ease;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.cat-btn { padding:6px 14px;border-radius:20px;border:none;font-size:13px;font-weight:500;background:#f3f4f6;color:#6b7280;cursor:pointer;white-space:nowrap;transition:all 0.15s; }
+.cat-btn.active { background:#3b82f6;color:white; }
+.cat-pick { padding:8px 16px;border-radius:20px;border:none;font-size:13px;font-weight:500;background:#f3f4f6;color:#6b7280;cursor:pointer;transition:all 0.15s; }
+.cat-pick.active { background:#3b82f6;color:white; }
+.food-card { animation:fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0;transform:translateY(4px); } to { opacity:1;transform:translateY(0); } }
 </style>
 </body>
 </html>
