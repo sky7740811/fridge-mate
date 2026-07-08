@@ -132,6 +132,8 @@ async function loadFoods() {
 }
 
 async function addFood(item) {
+  // Get current user from session
+  const { data: { user } } = await _sb.auth.getUser();
   const { data, error } = await _sb.from('foods').insert({
     family_id: currentFamilyId,
     name: item.name,
@@ -140,7 +142,7 @@ async function addFood(item) {
     added_at: item.added,
     expires_at: item.expires,
     notes: item.notes || '',
-    added_by: currentUser.id,
+    added_by: user ? user.id : '1cbb9bb0-5374-4613-beeb-071ce7561438',
   }).select().single();
   if (!error && data) { foods.push(data); render(); }
   return error;
