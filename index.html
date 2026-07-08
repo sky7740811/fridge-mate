@@ -17,12 +17,12 @@ body:not(.dark) { background: #f9fafb; color: inherit; }
 .screen { display: none; min-height: 100dvh; }
 .screen.active { display: flex; flex-direction: column; }
 input, select, textarea { font-size: 16px; }
-body.dark .card-bg { background: #16213e; border-color: #0f3460; color: #e0e0e0; }
-body:not(.dark) .card-bg { background: white; border-color: #f3f4f6; color: inherit; }
-body.dark .header-bg { background: #16213e; border-bottom-color: #0f3460; }
-body:not(.dark) .header-bg { background: white; border-bottom-color: #f3f4f6; }
-body.dark .input-bg { background: #1a1a2e; border-color: #0f3460; color: #e0e0e0; }
-body:not(.dark) .input-bg { background: white; border-color: #e5e7eb; color: inherit; }
+body.dark .card-bg { background: #16213e; }
+body:not(.dark) .card-bg { background: white; }
+body.dark .header-bg { background: #16213e; }
+body:not(.dark) .header-bg { background: white; }
+body.dark .input-bg { background: #1a1a2e; color: #e0e0e0; }
+body:not(.dark) .input-bg { background: white; color: inherit; }
 body.dark .text-muted { color: #8892b0; }
 body:not(.dark) .text-muted { color: #9ca3af; }
 body.dark .text-strong { color: #ccd6f6; }
@@ -33,17 +33,15 @@ body.dark .stat-bg-yellow { background: #1e3a1e; }
 body:not(.dark) .stat-bg-yellow { background: #fefce8; }
 body.dark .stat-bg-red { background: #3d1a1a; }
 body:not(.dark) .stat-bg-red { background: #fef2f2; }
-body.dark .nav-bg { background: #16213e; border-top-color: #0f3460; }
-body:not(.dark) .nav-bg { background: white; border-top-color: #f3f4f6; }
-body.dark .filter-bg { background: #1a1a2e; color: #8892b0; }
-body:not(.dark) .filter-bg { background: #f3f4f6; color: #6b7280; }
+body.dark .nav-bg { background: #16213e; }
+body:not(.dark) .nav-bg { background: white; }
 </style>
 </head>
 <body>
 
 <!-- ==================== MAIN SCREEN (default active) ==================== -->
 <div id="mainScreen" class="screen active">
-  <div class="header-bg" style="padding:48px 20px 16px;border-bottom:1px solid;">
+  <div class="header-bg" style="padding:48px 20px 16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h1 style="font-size:22px;font-weight:700;">🧊 Mon Frigo</h1>
@@ -54,7 +52,7 @@ body:not(.dark) .filter-bg { background: #f3f4f6; color: #6b7280; }
       </div>
     </div>
   </div>
-  <div style="display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid;" class="header-bg">
+  <div style="display:flex;gap:8px;padding:12px 20px;" class="header-bg">
     <div class="stat-bg-blue" style="flex:1;border-radius:12px;padding:10px;text-align:center;">
       <div id="statTotal" style="font-size:20px;font-weight:700;color:#2563eb;">0</div>
       <div style="font-size:11px;color:#60a5fa;">Total</div>
@@ -68,12 +66,12 @@ body:not(.dark) .filter-bg { background: #f3f4f6; color: #6b7280; }
       <div style="font-size:11px;color:#f87171;">Expire</div>
     </div>
   </div>
-  <div id="categoryFilter" class="header-bg" style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto;border-bottom:1px solid;"></div>
+  <div id="categoryFilter" class="header-bg" style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto;"></div>
   <div id="foodList" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"></div>
   <div style="position:fixed;bottom:72px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;">
     <button onclick="showScreen('addScreen')" style="pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:#3b82f6;color:white;font-size:28px;box-shadow:0 4px 14px rgba(59,130,246,0.4);cursor:pointer;">+</button>
   </div>
-  <div class="nav-bg" style="position:fixed;bottom:0;left:0;right:0;border-top:1px solid;padding:6px 20px 20px;">
+  <div class="nav-bg" style="position:fixed;bottom:0;left:0;right:0;padding:6px 20px 20px;">
     <div style="display:flex;justify-content:space-around;text-align:center;">
       <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#3b82f6;">Accueil</div></div>
       <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#d1d5db;">Courses</div></div>
@@ -84,7 +82,7 @@ body:not(.dark) .filter-bg { background: #f3f4f6; color: #6b7280; }
 
 <!-- ==================== SETTINGS SCREEN ==================== -->
 <div id="settingsScreen" class="screen">
-  <div class="header-bg" style="border-bottom:1px solid;padding:48px 20px 16px;">
+  <div class="header-bg" style="padding:48px 20px 16px;">
     <div style="display:flex;align-items:center;gap:16px;">
       <button onclick="showScreen('mainScreen')" style="border:none;background:none;font-size:20px;cursor:pointer;color:inherit;">←</button>
       <h1 style="font-size:18px;font-weight:700;">Reglages</h1>
@@ -116,7 +114,7 @@ body:not(.dark) .filter-bg { background: #f3f4f6; color: #6b7280; }
 
 <!-- ==================== ADD FOOD SCREEN ==================== -->
 <div id="addScreen" class="screen">
-  <div class="header-bg" style="border-bottom:1px solid;padding:48px 20px 16px;">
+  <div class="header-bg" style="padding:48px 20px 16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <button onclick="showScreen('mainScreen')" style="border:none;background:none;color:#9ca3af;font-size:16px;cursor:pointer;">Annuler</button>
       <h1 style="font-size:18px;font-weight:700;">Ajouter</h1>
