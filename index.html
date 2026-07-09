@@ -72,7 +72,33 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
   <div class="bg-white" style="position:fixed;bottom:0;left:0;right:0;padding:6px 20px 20px;">
     <div style="display:flex;justify-content:space-around;text-align:center;">
       <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#3b82f6;">Accueil</div></div>
-      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#d1d5db;">Courses</div></div>
+      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('coursesScreen')">Courses</div></div>
+      <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('settingsScreen')">Reglages</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== COURSES SCREEN ==================== -->
+<div id="coursesScreen" class="screen">
+  <div class="bg-white border-gray-100" style="padding:48px 20px 12px;border-bottom:1px solid;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h1 style="font-size:22px;font-weight:700;" class="text-gray-900">📋 Liste de courses</h1>
+      <span class="text-gray-400" style="font-size:13px;" id="coursesCount">0</span>
+    </div>
+  </div>
+  <div id="coursesList" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;">
+    <div id="coursesEmpty" style="text-align:center;padding:60px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">📝</div>
+      <p class="text-gray-500" style="font-size:16px;">Liste vide</p>
+    </div>
+  </div>
+  <div style="position:fixed;bottom:72px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;">
+    <button onclick="addCourseItem()" style="pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:#10b981;color:white;font-size:28px;box-shadow:0 4px 14px rgba(16,185,129,0.4);cursor:pointer;">+</button>
+  </div>
+  <div class="bg-white" style="position:fixed;bottom:0;left:0;right:0;padding:6px 20px 20px;">
+    <div style="display:flex;justify-content:space-around;text-align:center;">
+      <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('mainScreen')">Accueil</div></div>
+      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#10b981;">Courses</div></div>
       <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('settingsScreen')">Reglages</div></div>
     </div>
   </div>
@@ -218,7 +244,7 @@ let currentFilter = 'Tous';
       return;
     }
   }
-  setTimeout(() => { showScreen('mainScreen'); loadFoods(); subscribe(); }, 500);
+  setTimeout(() => { showScreen('mainScreen'); loadFoods(); loadCourses(); subscribe(); }, 500);
 })();
 
 // ===================== LOAD & SYNC =====================
@@ -279,6 +305,72 @@ function subscribe() {
       loadFoods();
     })
     .subscribe();
+}
+
+// ===================== COURSES =====================
+let courses = [];
+function loadCourses() {
+  try { const s = localStorage.getItem('fridge-courses'); if (s) courses = JSON.parse(s); } catch(e) {}
+  renderCourses();
+}
+function saveCourses() {
+  try { localStorage.setItem('fridge-courses', JSON.stringify(courses)); } catch(e) {}
+}
+
+function addCourseItem() {
+  const name = prompt('Ajouter un article:');
+  if (!name || !name.trim()) return;
+  const match = PRODUCT_DB.find(p => p.n.toLowerCase() === name.trim().toLowerCase());
+  courses.push({
+    id: Date.now(),
+    name: name.trim(),
+    cat: match ? match.c : 'Autres',
+    done: false
+  });
+  saveCourses();
+  renderCourses();
+}
+
+function toggleCourse(id) {
+  const c = courses.find(x => x.id === id);
+  if (c) { c.done = !c.done; saveCourses(); renderCourses(); }
+}
+
+function moveToFridge(id) {
+  const c = courses.find(x => x.id === id);
+  if (!c) return;
+  courses = courses.filter(x => x.id !== id);
+  saveCourses();
+  // Go to add screen with pre-filled name
+  showScreen('addScreen');
+  document.getElementById('inputName').value = c.name;
+  const match = PRODUCT_DB.find(p => p.n.toLowerCase() === c.name.toLowerCase());
+  if (match) { selectCat(match.c); document.getElementById('inputExpires').value = calcExpiry(match.s); }
+  onNameInput();
+}
+
+function renderCourses() {
+  const el = document.getElementById('coursesList');
+  const empty = document.getElementById('coursesEmpty');
+  const count = document.getElementById('coursesCount');
+  count.textContent = courses.length;
+
+  if (courses.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 0;"><div style="font-size:48px;margin-bottom:12px;">📝</div><p class="text-gray-500" style="font-size:16px;">Liste vide</p></div>';
+    return;
+  }
+
+  el.innerHTML = courses.map(c => `
+    <div class="bg-white border-gray-100" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:14px 16px;border:1px solid;${c.done ? 'opacity:0.6;' : ''}">
+      <div style="font-size:24px;width:36px;text-align:center;">${CAT_ICONS[c.cat]||'📦'}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="text-gray-900" style="font-weight:600;font-size:15px;${c.done ? 'text-decoration:line-through;' : ''}">${c.name}</div>
+        <div class="text-gray-400" style="font-size:12px;">${c.cat}</div>
+      </div>
+      <button onclick="toggleCourse(${c.id})" style="width:40px;height:40px;border-radius:50%;border:2px solid ${c.done ? '#10b981' : '#d1d5db'};background:${c.done ? '#10b981' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;">✓</button>
+      <button onclick="moveToFridge(${c.id})" style="width:40px;height:40px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;margin-left:6px;">+</button>
+    </div>
+  `).join('');
 }
 
 // ===================== DARK MODE =====================
@@ -621,6 +713,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (id === 'addScreen') initAddScreen();
+  if (id === 'coursesScreen') renderCourses();
 }
 
 function initApp() {
