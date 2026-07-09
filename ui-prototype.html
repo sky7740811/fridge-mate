@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fridge Mate - UI Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8fafc;
+  overflow: hidden;
+  height: 100dvh;
+}
+
+/* ===== Shared bottom nav ===== */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.screen-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Page transitions ===== */
+.page {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding-bottom: 80px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  background: #f8fafc;
+}
+.page.enter-right { transform: translateX(100%); opacity: 0; }
+.page.enter-left { transform: translateX(-30%); opacity: 0; }
+.page.active { transform: translateX(0); opacity: 1; }
+.page.exit-left { transform: translateX(-30%); opacity: 0; }
+.page.exit-right { transform: translateX(100%); opacity: 0; }
+
+/* ===== Card ===== */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  transition: box-shadow 0.2s;
+}
+.card:active { box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  background: white;
+  border-top: 1px solid #f1f5f9;
+  padding: 6px 0 20px;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 16px;
+  border: none;
+  background: none;
+  font-size: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color 0.15s;
+  color: #94a3b8;
+}
+.nav-item.active { color: #3b82f6; }
+.nav-item span:first-child { font-size: 22px; line-height: 1; }
+
+/* ===== FAB ===== */
+.fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.35);
+  cursor: pointer;
+  position: fixed;
+  bottom: 76px;
+  left: 50%;
+  margin-left: -26px;
+  z-index: 20;
+  transition: transform 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.fab:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(59,130,246,0.3); }
+.fab.green { background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
+.fab.green:active { box-shadow: 0 2px 6px rgba(16,185,129,0.3); }
+
+/* ===== Button styles ===== */
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary:active { opacity: 0.8; }
+
+/* ===== Stats ===== */
+.stat-card {
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  flex: 1;
+}
+.stat-value { font-size: 24px; font-weight: 700; }
+.stat-label { font-size: 11px; margin-top: 2px; }
+
+/* ===== Category filter chips ===== */
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.chip-inactive { background: #f1f5f9; color: #64748b; }
+.chip-active { background: #3b82f6; color: white; }
+
+/* ===== Empty state ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  gap: 8px;
+}
+.empty-icon { font-size: 56px; margin-bottom: 4px; }
+
+/* ===== Animations ===== */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-up { animation: fadeSlideUp 0.35s ease both; }
+.slide-up-delay-1 { animation-delay: 0.05s; }
+.slide-up-delay-2 { animation-delay: 0.1s; }
+.slide-up-delay-3 { animation-delay: 0.15s; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- ========== SCREEN AREA ========== -->
+  <div class="screen-area" id="screenArea">
+
+    <!-- ===== ACCUEIL ===== -->
+    <div id="pageHome" class="page active" style="background:#f8fafc;">
+      <div style="padding:52px 20px 12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <h1 style="font-size:24px;font-weight:700;color:#0f172a;">🧊 Mon Frigo</h1>
+          <span style="font-size:12px;color:#94a3b8;">👨‍👩‍👧‍👧</span>
+        </div>
+        <p style="font-size:13px;color:#94a3b8;" id="demoDate">mercredi 9 juillet</p>
+      </div>
+
+      <!-- Stats row -->
+      <div style="display:flex;gap:8px;padding:0 20px 12px;">
+        <div class="stat-card" style="background:#eff6ff;">
+          <div class="stat-value" style="color:#2563eb;">0</div>
+          <div class="stat-label" style="color:#60a5fa;">Total</div>
+        </div>
+        <div class="stat-card" style="background:#fefce8;">
+          <div class="stat-value" style="color:#ca8a04;">0</div>
+          <div class="stat-label" style="color:#eab308;">Bientôt</div>
+        </div>
+        <div class="stat-card" style="background:#fef2f2;">
+          <div class="stat-value" style="color:#dc2626;">0</div>
+          <div class="stat-label" style="color:#f87171;">Expiré</div>
+        </div>
+      </div>
+
+      <!-- Category filter -->
+      <div style="padding:0 20px 12px;display:flex;gap:8px;overflow-x:auto;">
+        <button class="chip chip-active">Tous</button>
+        <button class="chip chip-inactive">🥩 Viande</button>
+        <button class="chip chip-inactive">🐟 Poisson</button>
+        <button class="chip chip-inactive">🥬 Légumes</button>
+        <button class="chip chip-inactive">🍎 Fruits</button>
+        <button class="chip chip-inactive">🧀 Laitier</button>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state slide-up">
+        <div class="empty-icon">🧊</div>
+        <p style="font-size:17px;font-weight:600;color:#0f172a;">Le frigo est vide</p>
+        <p style="font-size:14px;color:#94a3b8;">Ajoutez vos premiers aliments</p>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;width:100%;max-width:260px;">
+          <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;">
+            <span style="font-size:22px;">🥛</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:13px;font-weight:600;color:#0f172a;">Astuce</div>
+              <div style="font-size:12px;color:#94a3b8;">Tapez le nom d'un aliment ou choisissez dans la liste</div>
+            </div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;">
+            <span style="font-size:22px;">👨‍👩‍👧‍👧</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:13px;font-weight:600;color:#0f172a;">Partagé</div>
+              <div style="font-size:12px;color:#94a3b8;">Les aliments sont synchronisés avec votre partenaire</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COURSES ===== -->
+    <div id="pageCourses" class="page" style="background:#f8fafc;">
+      <div style="padding:52px 20px 12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h1 style="font-size:24px;font-weight:700;color:#0f172a;">📋 Liste</h1>
+          <span style="font-size:13px;color:#94a3b8;background:#f1f5f9;padding:2px 10px;border-radius:10px;">3</span>
+        </div>
+      </div>
+
+      <!-- Mock items -->
+      <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px;">
+        <div class="card slide-up slide-up-delay-1" style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">🥩</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:15px;color:#0f172a;">Steak haché</div>
+            <div style="font-size:12px;color:#94a3b8;">500g</div>
+          </div>
+          <button style="width:38px;height:38px;border-radius:50%;border:2px solid #e2e8f0;background:white;display:flex;align-items:center;justify-content:center;font-size:16px;color:#e2e8f0;cursor:pointer;">✓</button>
+          <button style="width:38px;height:38px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;color:white;cursor:pointer;">+</button>
+        </div>
+        <div class="card slide-up slide-up-delay-2" style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">🥛</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:15px;color:#0f172a;">Lait</div>
+            <div style="font-size:12px;color:#94a3b8;">1L</div>
+          </div>
+          <button style="width:38px;height:38px;border-radius:50%;border:2px solid #e2e8f0;background:white;display:flex;align-items:center;justify-content:center;font-size:16px;color:#e2e8f0;cursor:pointer;">✓</button>
+          <button style="width:38px;height:38px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;color:white;cursor:pointer;">+</button>
+        </div>
+        <div class="card slide-up slide-up-delay-3" style="display:flex;align-items:center;gap:10px;opacity:0.6;">
+          <span style="font-size:22px;">🧀</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:15px;color:#0f172a;text-decoration:line-through;">Camembert</div>
+            <div style="font-size:12px;color:#94a3b8;">1x · ✔ Acheté</div>
+          </div>
+          <button style="width:38px;height:38px;border-radius:50%;background:#10b981;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;color:white;cursor:pointer;">✓</button>
+          <button style="width:38px;height:38px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;color:white;cursor:pointer;">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADD ===== -->
+    <div id="pageAdd" class="page" style="background:#f8fafc;">
+      <div style="padding:52px 20px 12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button class="btn-text">← Annuler</button>
+          <h1 style="font-size:18px;font-weight:700;color:#0f172a;">Ajouter</h1>
+          <button class="btn-primary" style="padding:10px 20px;font-size:14px;">OK</button>
+        </div>
+      </div>
+
+      <div style="padding:0 20px;display:flex;flex-direction:column;gap:20px;">
+        <!-- Nom -->
+        <div>
+          <label style="font-size:12px;font-weight:500;color:#64748b;margin-bottom:6px;display:block;">Article</label>
+          <div style="position:relative;">
+            <input placeholder="Ex: Lait, Poulet…" value="Sa" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e2e8f0;font-size:16px;background:white;outline:none;transition:border-color 0.2s;">
+            <div style="position:absolute;z-index:5;background:white;border:1px solid #e2e8f0;border-radius:12px;margin-top:4px;max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.06);width:100%;">
+              <div style="padding:12px 14px;font-size:15px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;">
+                <span style="color:#0f172a;">Saumon</span>
+                <span style="color:#94a3b8;font-size:12px;">🐟 Poisson</span>
+              </div>
+              <div style="padding:12px 14px;font-size:15px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;background:#f1f5f9;">
+                <span style="color:#0f172a;">Saumon fumé</span>
+                <span style="color:#94a3b8;font-size:12px;">🐟 Poisson</span>
+              </div>
+              <div style="padding:12px 14px;font-size:15px;cursor:pointer;display:flex;justify-content:space-between;">
+                <span style="color:#0f172a;">Sardine</span>
+                <span style="color:#94a3b8;font-size:12px;">🐟 Poisson</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantité -->
+        <div>
+          <label style="font-size:12px;font-weight:500;color:#64748b;margin-bottom:6px;display:block;">Quantité</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button style="width:40px;height:40px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;">−</button>
+            <input value="1" style="flex:1;padding:14px;border-radius:12px;border:1px solid #e2e8f0;font-size:16px;text-align:center;background:white;outline:none;">
+            <button style="width:40px;height:40px;border-radius:10px;border:1px solid #e2e8f0;background:white;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;">+</button>
+          </div>
+        </div>
+
+        <!-- Catégorie -->
+        <div>
+          <label style="font-size:12px;font-weight:500;color:#64748b;margin-bottom:6px;display:block;">Catégorie</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button class="chip chip-inactive">🥩 Viande</button>
+            <button class="chip chip-active">🐟 Poisson</button>
+            <button class="chip chip-inactive">🥬 Légumes</button>
+            <button class="chip chip-inactive">🍎 Fruits</button>
+          </div>
+        </div>
+
+        <!-- Congélateur -->
+        <div style="display:flex;align-items:center;gap:10px;padding:4px 0;">
+          <input type="checkbox" id="demoFrozen" style="width:20px;height:20px;accent-color:#3b82f6;">
+          <label for="demoFrozen" style="font-size:15px;cursor:pointer;">❄️ Congélateur</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div id="pageSettings" class="page" style="background:#f8fafc;">
+      <div style="padding:52px 20px 12px;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <button class="btn-text">←</button>
+          <h1 style="font-size:18px;font-weight:700;color:#0f172a;">Réglages</h1>
+        </div>
+      </div>
+
+      <div style="padding:0 20px;display:flex;flex-direction:column;gap:12px;">
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-weight:600;color:#0f172a;">Mode sombre</div>
+            <div style="font-size:13px;color:#94a3b8;">Thème sombre</div>
+          </div>
+          <div style="width:46px;height:24px;border-radius:12px;background:#3b82f6;position:relative;cursor:pointer;">
+            <div style="width:20px;height:20px;border-radius:50%;background:white;position:absolute;right:3px;top:2px;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-weight:600;color:#0f172a;">Famille</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:4px;">👨‍👩‍👧‍👧 Compte partagé</div>
+        </div>
+        <div class="card">
+          <div style="font-weight:600;color:#0f172a;">À propos</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:4px;">Fridge Mate v1.4.3</div>
+        </div>
+        <button class="card" style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:none;cursor:pointer;">
+          <div>
+            <div style="font-weight:600;color:#0f172a;">📤 Exporter</div>
+            <div style="font-size:13px;color:#94a3b8;">Sauvegarder vos données</div>
+          </div>
+          <span style="font-size:18px;color:#94a3b8;">→</span>
+        </button>
+        <button class="card" style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:none;cursor:pointer;">
+          <div>
+            <div style="font-weight:600;color:#ef4444;">🔄 Vider le cache</div>
+            <div style="font-size:13px;color:#94a3b8;">Forcer l'actualisation</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== FAB (shared) ========== -->
+  <button class="fab" id="mainFab">+</button>
+
+  <!-- ========== BOTTOM NAV (shared) ========== -->
+  <div class="bottom-nav">
+    <button class="nav-item active" data-page="pageHome">
+      <span>🏠</span> Accueil
+    </button>
+    <button class="nav-item" data-page="pageCourses">
+      <span>📋</span> Courses
+    </button>
+    <button class="nav-item" data-page="pageSettings">
+      <span>⚙️</span> Réglages
+    </button>
+  </div>
+</div>
+
+<script>
+// ===== Page navigation with transitions =====
+const pages = {
+  home: document.getElementById('pageHome'),
+  courses: document.getElementById('pageCourses'),
+  add: document.getElementById('pageAdd'),
+  settings: document.getElementById('pageSettings')
+};
+const navItems = document.querySelectorAll('.nav-item');
+const fab = document.getElementById('mainFab');
+let currentPage = 'home';
+
+function navigateTo(pageId, direction) {
+  if (pageId === currentPage) return;
+  const old = pages[currentPage];
+  const next = pages[pageId];
+
+  // Determine animation direction
+  const order = ['home', 'courses', 'add', 'settings'];
+  const oldIdx = order.indexOf(currentPage);
+  const newIdx = order.indexOf(pageId);
+  const dir = newIdx > oldIdx ? 'right' : 'left';
+
+  // Set up entering page
+  next.classList.remove('active', 'exit-left', 'exit-right');
+  next.classList.add(dir === 'right' ? 'enter-right' : 'enter-left');
+
+  // Force reflow
+  void next.offsetWidth;
+
+  // Animate
+  old.classList.remove('enter-right', 'enter-left');
+  old.classList.add(dir === 'right' ? 'exit-left' : 'exit-right');
+  next.classList.remove('enter-right', 'enter-left');
+  next.classList.add('active');
+
+  // Clean up
+  setTimeout(() => {
+    old.classList.remove('exit-left', 'exit-right');
+  }, 300);
+
+  currentPage = pageId;
+  updateNav(pageId);
+  updateFab(pageId);
+}
+
+function updateNav(pageId) {
+  navItems.forEach(item => {
+    item.classList.toggle('active', item.dataset.page === pageId);
+  });
+}
+
+function updateFab(pageId) {
+  if (pageId === 'home') {
+    fab.className = 'fab';
+    fab.textContent = '+';
+    fab.onclick = () => navigateTo('add', 'right');
+  } else if (pageId === 'courses') {
+    fab.className = 'fab green';
+    fab.textContent = '+';
+    fab.onclick = () => navigateTo('add', 'right');
+  } else {
+    fab.style.display = 'none';
+  }
+}
+
+// Nav click handlers
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    navigateTo(item.dataset.page);
+  });
+});
+
+// Init
+updateFab('home');
+</script>
+
+</body>
+</html>
