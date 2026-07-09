@@ -242,13 +242,13 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.4.2';
+const APP_VERSION = '1.4.3';
 
 // Force refresh on version change
 (function() {
   const v = localStorage.getItem('fridge-version');
   if (v && v !== APP_VERSION) {
-    const keep = ['fridge-dark', 'fridge-pw'];
+    const keep = ['fridge-dark', 'fridge-pw', 'fridge-foods-backup', 'fridge-courses'];
     const saved = {};
     keep.forEach(k => { const val = localStorage.getItem(k); if (val) saved[k] = val; });
     localStorage.clear();
