@@ -94,7 +94,7 @@ body.dark .food-card { border-color: #2a2a2a !important; }
         <p id="currentDate" style="font-size:14px;color:#9ca3af;margin-top:1px;"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
-        <img src="icon.jpg" style="height:38px;width:auto;border-radius:8px;object-fit:cover;transform:scale(2);transform-origin:right bottom;margin-top:4px;">
+        <img src="icon.jpg" style="height:38px;width:auto;border-radius:8px;object-fit:cover;transform:scale(2);transform-origin:right bottom;margin-top:8px;">
       </div>
     </div>
     <div id="debugMsg" style="font-size:11px;color:#ef4444;margin-top:2px;min-height:0;"></div>
@@ -147,7 +147,7 @@ body.dark .food-card { border-color: #2a2a2a !important; }
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Article</label>
       <div style="position:relative;">
         <input id="courseInputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onCourseNameInput()" autocomplete="off" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
-        <div id="courseNameDropdown" class="bg-white border-gray-100" style="display:none;position:absolute;z-index:50;border:1px solid;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
+        <div id="courseNameDropdown" class="bg-white border-gray-100" style="display:none;position:absolute;z-index:50;border:1px solid;border-radius:12px;margin-top:8px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
       </div>
     </div>
     <div>
@@ -219,7 +219,7 @@ body.dark .food-card { border-color: #2a2a2a !important; }
       <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Nom</label>
       <div style="position:relative;">
         <input id="inputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onNameInput()" autocomplete="off" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
-        <div id="nameDropdown" class="bg-white border-gray-100" style="display:none;position:absolute;z-index:50;border:1px solid;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
+        <div id="nameDropdown" class="bg-white border-gray-100" style="display:none;position:absolute;z-index:50;border:1px solid;border-radius:12px;margin-top:8px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
       </div>
     </div>
     <div>
@@ -759,12 +759,12 @@ function render() {
           <span style="font-size:12px;" class="text-gray-500">${f.quantity}</span>
           ${f.frozen ? '<span style="font-size:14px;">❄️</span>' : ''}
         </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
           <span style="font-size:12px;" class="text-gray-500">${f.category}</span>
           <span style="font-size:10px;color:#e5e7eb;">|</span>
           <span style="font-size:12px;color:#6b7280;">+${daysIn}j</span>
         </div>
-        ${f.notes ? `<div style="font-size:11px;color:#94a3b8;margin-top:4px;">📝 ${f.notes.substring(0,40)}${f.notes.length>40?'...':''}</div>` : ''}
+        ${f.notes ? `<div style="font-size:11px;color:#94a3b8;margin-top:8px;">📝 ${f.notes.substring(0,40)}${f.notes.length>40?'...':''}</div>` : ''}
       </div>
       <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;background:${badge.bg};color:${badge.color||'white'};white-space:nowrap;">${badge.text}</span>
       <div style="display:flex;flex-direction:column;gap:2px;align-items:center;">
