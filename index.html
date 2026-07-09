@@ -62,6 +62,9 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
 body.dark .shared-nav, body.dark .shared-fab { border-top-color: #0f3460; }
 body.dark .shared-fab { box-shadow: none; }
 body.dark .card, body.dark .food-card { background: #16213e; border-color: #0f3460; }
+body.dark .shared-nav { background: #16213e !important; }
+body.dark .nav-item { color: #64748b; }
+body.dark .nav-item.active { color: #60a5fa; }
 </style>
 </head>
 <body>
@@ -938,6 +941,13 @@ function showScreen(id) {
     fab.onclick = id === 'coursesScreen' ? addCourseItem : () => showScreen('addScreen');
   }
 }
+
+// Nav click handlers
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', function() {
+    showScreen(this.dataset.page);
+  });
+});
 
 function initApp() {
   showScreen('mainScreen');
