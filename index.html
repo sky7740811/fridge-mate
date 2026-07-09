@@ -271,7 +271,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.6.4';
+const APP_VERSION = '1.6.5';
 
 // Force refresh on version change
 (function() {
@@ -735,7 +735,7 @@ function render() {
                   dDay === 0 ? { bg:'#ef4444', text:'Perime' } :
                   dDay <= 3 ? { bg:'#eab308', text:`J-${dDay}` } :
                   { bg:'#d1fae5', text:`J-${dDay}`, color:'#065f46' };
-    return `<div class="food-card bg-white border-gray-100" onclick="editFood('${f.id}')" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);cursor:pointer;">`
+    return `<div class="food-card bg-white border-gray-100" onclick="editFood('${f.id}')" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);cursor:pointer;">
       <div style="font-size:28px;width:40px;text-align:center;">${CAT_ICONS[f.category]||'📦'}</div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;">
