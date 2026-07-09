@@ -274,7 +274,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.6.6';
+const APP_VERSION = '1.7.2';
 
 // Force refresh on version change
 (function() {
@@ -735,7 +735,7 @@ function render() {
 
   const container = document.getElementById('foodList');
   if (list.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:52px;margin-bottom:8px;">🧊</div><p style="font-size:17px;font-weight:600;color:#1f2937;">Le frigo est vide</p><p style="font-size:14px;color:#9ca3af;margin-bottom:16px;">Ajoutez vos premiers aliments</p><div style="display:flex;flex-direction:column;gap:8px;max-width:280px;margin:0 auto;"><div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;"><span style="font-size:22px;">🥛</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#1f2937;">Astuce</div><div style="font-size:12px;color:#9ca3af;">Tapez un nom ou choisissez dans la liste</div></div></div><div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;"><span style="font-size:22px;">👨‍👩‍👧‍👧</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#1f2937;">Partagé</div><div style="font-size:12px;color:#9ca3af;">Synchronisé avec votre partenaire</div></div></div></div></div>';
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:52px;margin-bottom:8px;">🧊</div><p class="text-gray-900" style="font-size:17px;font-weight:600;">Le frigo est vide</p><p class="text-gray-500" style="font-size:14px;margin-bottom:16px;">Ajoutez vos premiers aliments</p><div style="display:flex;flex-direction:column;gap:8px;max-width:280px;margin:0 auto;"><div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;"><span style="font-size:22px;">🥛</span><div style="text-align:left;"><div class="text-gray-900" style="font-size:13px;font-weight:600;">Astuce</div><div class="text-gray-500" style="font-size:12px;">Tapez un nom ou choisissez dans la liste</div></div></div><div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;"><span style="font-size:22px;">👨‍👩‍👧‍👧</span><div style="text-align:left;"><div class="text-gray-900" style="font-size:13px;font-weight:600;">Partagé</div><div class="text-gray-500" style="font-size:12px;">Synchronisé avec votre partenaire</div></div></div></div></div>';
     return;
   }
   container.innerHTML = list.map(f => {
