@@ -41,7 +41,7 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
 .nav-item span { font-size: 22px; }
 
 /* Shared FAB */
-.shared-fab { width: 52px; height: 52px; border-radius: 50%; border: none; color: white; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59,130,246,0.35); cursor: pointer; position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%); z-index: 20; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: opacity 0.2s; }
+.shared-fab { width: 52px; height: 52px; border-radius: 50%; border: none; background: #3b82f6; color: white; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59,130,246,0.35); cursor: pointer; position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%); z-index: 20; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: opacity 0.2s; }
 .shared-fab.hidden { opacity: 0; pointer-events: none; }
 .shared-fab.green { background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
 
@@ -70,8 +70,9 @@ body.dark .stat-bg-blue { background: #112240 !important; }
 body.dark .stat-bg-yellow { background: #1e3a1e !important; }
 body.dark .stat-bg-red { background: #3d1a1a !important; }
 .border-gray-100 { border: 1px solid #f1f5f9 !important; }
+body.dark .border-gray-100 { border-color: #0f3460 !important; }
 .food-card { border: 1px solid #f1f5f9 !important; }
-.bg-white.border-gray-100:not([class*="food-card"]) { border: 1px solid #f1f5f9 !important; }
+body.dark .food-card { border-color: #0f3460 !important; }
 </style>
 </head>
 <body>
@@ -333,7 +334,7 @@ function exportData() {
   } catch(e) {
     const dm = document.getElementById('debugMsg');
     if (dm) dm.textContent = 'Login: ' + e.message;
-    localStorage.removeItem('fridge-pw');
+    // Don't remove saved password on transient errors (rate limit, etc.)
     if (attempt < 3) {
       setTimeout(() => tryLogin(attempt + 1), 2000);
       return;
@@ -882,6 +883,12 @@ async function saveFood() {
 function editFood(id) {
   const f = foods.find(x => x.id === id);
   if (f) { initAddScreen(f); showScreen('addScreen'); }
+  else {
+    // Fallback: try to fetch from Supabase directly
+    _sb.from('foods').select('*').eq('id', id).single().then(({ data, error }) => {
+      if (data) { initAddScreen(data); showScreen('addScreen'); }
+    });
+  }
 }
 
 let selectedCategory = 'Autres';
