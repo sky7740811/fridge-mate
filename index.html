@@ -242,9 +242,9 @@ body.dark .nav-item.active { color: #60a5fa; }
 
 <!-- ==================== SHARED NAV ==================== -->
 <div class="shared-nav">
-  <button class="nav-item active" data-page="mainScreen"><span>🏠</span> Accueil</button>
-  <button class="nav-item" data-page="coursesScreen"><span>📋</span> Courses</button>
-  <button class="nav-item" data-page="settingsScreen"><span>⚙️</span> Réglages</button>
+  <button class="nav-item active" data-page="mainScreen" onclick="showScreen('mainScreen')"><span>🏠</span> Accueil</button>
+  <button class="nav-item" data-page="coursesScreen" onclick="showScreen('coursesScreen')"><span>📋</span> Courses</button>
+  <button class="nav-item" data-page="settingsScreen" onclick="showScreen('settingsScreen')"><span>⚙️</span> Réglages</button>
 </div>
 
 <script>
@@ -264,7 +264,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.4.2';
+const APP_VERSION = '1.6.2';
 
 // Force refresh on version change
 (function() {
