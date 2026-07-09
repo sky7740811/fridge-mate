@@ -72,7 +72,40 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
   <div class="bg-white" style="position:fixed;bottom:0;left:0;right:0;padding:6px 20px 20px;">
     <div style="display:flex;justify-content:space-around;text-align:center;">
       <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#3b82f6;">Accueil</div></div>
-      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#d1d5db;">Courses</div></div>
+      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('coursesScreen')">Courses</div></div>
+      <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('settingsScreen')">Reglages</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== COURSES SCREEN ==================== -->
+<div id="coursesScreen" class="screen">
+  <div class="bg-white border-gray-100" style="padding:48px 20px 16px;border-bottom:1px solid;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h1 style="font-size:22px;font-weight:700;">📋 Liste de courses</h1>
+      <span class="text-gray-400" style="font-size:13px;" id="coursesCount">0 article</span>
+    </div>
+  </div>
+
+  <!-- Liste -->
+  <div id="coursesList" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;">
+    <div style="text-align:center;padding:60px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">📝</div>
+      <p class="text-gray-900" style="font-size:16px;">Liste vide</p>
+      <p class="text-gray-500" style="font-size:13px;">Ajoutez des articles a acheter</p>
+    </div>
+  </div>
+
+  <!-- + FAB -->
+  <div style="position:fixed;bottom:76px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;">
+    <button onclick="showAddCourse()" style="pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:#10b981;color:white;font-size:28px;box-shadow:0 4px 14px rgba(16,185,129,0.4);cursor:pointer;">+</button>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bg-white" style="position:fixed;bottom:0;left:0;right:0;padding:6px 20px 20px;">
+    <div style="display:flex;justify-content:space-around;text-align:center;">
+      <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('mainScreen')">Accueil</div></div>
+      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#10b981;">Courses</div></div>
       <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('settingsScreen')">Reglages</div></div>
     </div>
   </div>
@@ -179,7 +212,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.2.1';
 
 // Force refresh on version change
 (function() {
