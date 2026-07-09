@@ -70,6 +70,12 @@ body.dark .text-gray-900, body.dark h1, body.dark h2 { color: #ccd6f6 !important
 body.dark .stat-bg-blue { background: #112240 !important; }
 body.dark .stat-bg-yellow { background: #1e3a1e !important; }
 body.dark .stat-bg-red { background: #3d1a1a !important; }
+body.dark .stat-bg-blue div:first-child { color: #93c5fd !important; }
+body.dark .stat-bg-blue div:last-child { color: #60a5fa !important; }
+body.dark .stat-bg-yellow div:first-child { color: #fde047 !important; }
+body.dark .stat-bg-yellow div:last-child { color: #facc15 !important; }
+body.dark .stat-bg-red div:first-child { color: #fca5a5 !important; }
+body.dark .stat-bg-red div:last-child { color: #f87171 !important; }
 .border-gray-100 { border: 1px solid #f1f5f9 !important; }
 body.dark .border-gray-100 { border-color: #0f3460 !important; }
 body.dark [style*="border-bottom"] { border-bottom-color: #0f3460 !important; }
@@ -81,21 +87,21 @@ body.dark .food-card { border-color: #0f3460 !important; }
 
 <!-- ==================== MAIN SCREEN (default active) ==================== -->
 <div id="mainScreen" class="screen active">
-  <div class="bg-white border-gray-100" style="position:sticky;top:0;z-index:5;padding:48px 20px 8px;border-bottom:1px solid;">
+  <div class="bg-white border-gray-100" style="position:sticky;top:0;z-index:5;padding:32px 20px 4px;border-bottom:1px solid;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h1 style="font-size:22px;font-weight:700;color:#111827;">🧊 Frigo de famille Lee</h1>
-        <p id="currentDate" style="font-size:13px;color:#9ca3af;margin-top:2px;"></p>
+        <p id="currentDate" style="font-size:12px;color:#9ca3af;margin-top:1px;"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
         <span style="font-size:12px;" class="text-gray-400">👨‍👩‍👧‍👧</span>
       </div>
     </div>
-    <div id="debugMsg" style="font-size:11px;color:#ef4444;margin-top:4px;min-height:16px;"></div>
+    <div id="debugMsg" style="font-size:11px;color:#ef4444;margin-top:2px;min-height:14px;"></div>
   </div>
-  <div class="bg-white border-gray-50" style="display:flex;gap:8px;padding:12px 20px;">
-    <div class="bg-blue-50 stat-bg-blue" style="flex:1;border-radius:12px;padding:10px;text-align:center;">
-      <div id="statTotal" style="font-size:20px;font-weight:700;color:#2563eb;">0</div>
+  <div class="bg-white border-gray-50" style="position:sticky;top:0;z-index:4;display:flex;gap:6px;padding:8px 20px;">
+    <div class="bg-blue-50 stat-bg-blue" style="flex:1;border-radius:10px;padding:8px;text-align:center;">
+      <div id="statTotal" style="font-size:18px;font-weight:700;color:#2563eb;">0</div>
       <div style="font-size:11px;color:#60a5fa;">Total</div>
     </div>
     <div class="bg-yellow-50 stat-bg-yellow" style="flex:1;border-radius:12px;padding:10px;text-align:center;">
@@ -274,7 +280,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.7.2';
+const APP_VERSION = '1.7.3';
 
 // Force refresh on version change
 (function() {
