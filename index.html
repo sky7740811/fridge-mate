@@ -191,7 +191,7 @@ body.dark .card, body.dark .food-card { background: #16213e; border-color: #0f34
   <div class="bg-white border-gray-100" style="padding:48px 20px 16px;border-bottom:1px solid;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <button onclick="showScreen('mainScreen')" style="border:none;background:none;font-size:16px;cursor:pointer;" class="text-gray-400">Annuler</button>
-      <h1 style="font-size:18px;font-weight:700;">Ajouter</h1>
+      <h1 id="addScreenTitle" style="font-size:18px;font-weight:700;">Ajouter</h1>
       <button onclick="saveFood()" id="saveBtn" disabled style="border:none;background:none;color:#d1d5db;font-size:16px;font-weight:600;cursor:pointer;">OK</button>
     </div>
   </div>
@@ -284,6 +284,7 @@ const _sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentFamilyId = 'f90b7994-aec3-49c6-813c-04774c89f934';
 let foods = [];
 let currentFilter = 'Tous';
+let currentEditId = null;
 
 // ===================== BACKUP =====================
 function backupFoods() {
@@ -724,7 +725,7 @@ function render() {
                   dDay === 0 ? { bg:'#ef4444', text:'Perime' } :
                   dDay <= 3 ? { bg:'#eab308', text:`J-${dDay}` } :
                   { bg:'#d1fae5', text:`J-${dDay}`, color:'#065f46' };
-    return `<div class="food-card bg-white border-gray-100" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);border:1px solid;">
+    return `<div class="food-card bg-white border-gray-100" onclick="editFood('${f.id}')" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);border:1px solid;cursor:pointer;">
       <div style="font-size:28px;width:40px;text-align:center;">${CAT_ICONS[f.category]||'📦'}</div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;">
@@ -737,7 +738,8 @@ function render() {
           <span style="font-size:10px;color:#e5e7eb;">|</span>
           <span style="font-size:12px;color:#6b7280;">+${daysIn}j</span>
         </div>
-      </div>
+        ${f.notes ? `<div style="font-size:11px;color:#94a3b8;margin-top:4px;">📝 ${f.notes.substring(0,40)}${f.notes.length>40?'...':''}</div>` : ''}
+      </div>`
       <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;background:${badge.bg};color:${badge.color||'white'};white-space:nowrap;">${badge.text}</span>
       <div style="display:flex;flex-direction:column;gap:2px;align-items:center;">
         <button onclick="updateQty('${f.id}',1)" style="border:none;background:none;font-size:14px;cursor:pointer;line-height:1;padding:0;" class="text-gray-400">▲</button>
@@ -832,12 +834,29 @@ async function saveFood() {
     const match = PRODUCT_DB.find(p => p.n.toLowerCase() === name.toLowerCase());
     expires = calcExpiry(match ? match.s : 7);
   }
-  await addFood({
-    name, qty: document.getElementById('inputQty').value || '1',
-    cat: selectedCategory, added: document.getElementById('inputAdded').value || today(),
-    expires, notes: document.getElementById('inputNotes').value,
-    frozen: document.getElementById('inputFrozen').checked,
-  });
+  
+  if (currentEditId) {
+    // Update existing item
+    await _sb.from('foods').update({
+      name, quantity: document.getElementById('inputQty').value || '1',
+      category: selectedCategory, added_at: document.getElementById('inputAdded').value || today(),
+      expires_at: expires, notes: document.getElementById('inputNotes').value,
+      frozen: document.getElementById('inputFrozen').checked,
+    }).eq('id', currentEditId);
+    const f = foods.find(x => x.id === currentEditId);
+    if (f) { f.name = name; f.quantity = document.getElementById('inputQty').value || '1'; f.category = selectedCategory; f.added_at = document.getElementById('inputAdded').value || today(); f.expires_at = expires; f.notes = document.getElementById('inputNotes').value; f.frozen = document.getElementById('inputFrozen').checked; }
+    backupFoods();
+  } else {
+    // Add new item
+    await addFood({
+      name, qty: document.getElementById('inputQty').value || '1',
+      cat: selectedCategory, added: document.getElementById('inputAdded').value || today(),
+      expires, notes: document.getElementById('inputNotes').value,
+      frozen: document.getElementById('inputFrozen').checked,
+    });
+  }
+  
+  currentEditId = null;
   document.getElementById('inputName').value = '';
   document.getElementById('inputQty').value = '1';
   document.getElementById('inputAdded').value = today();
@@ -850,13 +869,42 @@ async function saveFood() {
   render();
 }
 
+function editFood(id) {
+  const f = foods.find(x => x.id === id);
+  if (f) { initAddScreen(f); showScreen('addScreen'); }
+}
+
 let selectedCategory = 'Autres';
-function initAddScreen() {
+function initAddScreen(editItem) {
+  currentEditId = editItem ? editItem.id : null;
   document.getElementById('inputAdded').value = today();
   const container = document.getElementById('categoryPicker');
   container.innerHTML = CATEGORIES.map(c =>
     `<button onclick="selectCat('${c}')" class="cat-pick ${c==='Autres'?'active':''}">${CAT_ICONS[c]||''} ${c}</button>`
   ).join('');
+  
+  const title = document.getElementById('addScreenTitle');
+  if (editItem) {
+    title.textContent = 'Modifier';
+    document.getElementById('inputName').value = editItem.name;
+    document.getElementById('inputQty').value = editItem.quantity || '1';
+    document.getElementById('inputAdded').value = editItem.added_at || today();
+    document.getElementById('inputExpires').value = editItem.expires_at;
+    document.getElementById('inputNotes').value = editItem.notes || '';
+    document.getElementById('inputFrozen').checked = editItem.frozen || false;
+    selectCat(editItem.category);
+    checkForm();
+  } else {
+    title.textContent = 'Ajouter';
+    document.getElementById('inputName').value = '';
+    document.getElementById('inputQty').value = '1';
+    document.getElementById('inputAdded').value = today();
+    document.getElementById('inputExpires').value = '';
+    document.getElementById('inputNotes').value = '';
+    document.getElementById('inputFrozen').checked = false;
+    selectedCategory = 'Autres';
+    checkForm();
+  }
 }
 function selectCat(c) {
   selectedCategory = c;
