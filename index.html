@@ -77,10 +77,10 @@ body.dark .stat-bg-yellow div:last-child { color: #facc15 !important; }
 body.dark .stat-bg-red div:first-child { color: #fca5a5 !important; }
 body.dark .stat-bg-red div:last-child { color: #f87171 !important; }
 .border-gray-100 { border: 1px solid #f1f5f9 !important; }
-body.dark .border-gray-100 { border-color: #0f3460 !important; }
-body.dark [style*="border-bottom"] { border-bottom-color: #0f3460 !important; }
-.food-card { border: 1px solid #f1f5f9 !important; }
-body.dark .food-card { border-color: #0f3460 !important; }
+body.dark .border-gray-100 { border-color: #2a2a2a !important; }
+body.dark [style*="border-bottom"] { border-bottom-color: #2a2a2a !important; }
+body.dark .border-gray-50 { border-color: #2a2a2a !important; }
+body.dark .food-card { border-color: #2a2a2a !important; }
 </style>
 </head>
 <body>
@@ -94,7 +94,7 @@ body.dark .food-card { border-color: #0f3460 !important; }
         <p id="currentDate" style="font-size:14px;color:#9ca3af;margin-top:1px;"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
-        <img src="icon.jpg" style="height:38px;width:auto;border-radius:8px;object-fit:cover;transform:scale(2);transform-origin:right bottom;">
+        <img src="icon.jpg" style="height:38px;width:auto;border-radius:8px;object-fit:cover;transform:scale(2);transform-origin:right bottom;margin-top:4px;">
       </div>
     </div>
     <div id="debugMsg" style="font-size:11px;color:#ef4444;margin-top:2px;min-height:0;"></div>
@@ -280,7 +280,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.7.3';
+const APP_VERSION = '1.7.6';
 
 // Force refresh on version change
 (function() {
