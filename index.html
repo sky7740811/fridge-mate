@@ -274,7 +274,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.6.6';
 
 // Force refresh on version change
 (function() {
@@ -510,6 +510,12 @@ function toggleCourse(id) {
   if (c) { c.done = !c.done; saveCourses(); renderCourses(); }
 }
 
+function deleteCourseItem(id) {
+  courses = courses.filter(x => x.id !== id);
+  saveCourses();
+  renderCourses();
+}
+
 function moveToFridge(id) {
   const c = courses.find(x => x.id === id);
   if (!c) return;
@@ -543,7 +549,8 @@ function renderCourses() {
         <div class="text-gray-400" style="font-size:12px;">${c.qty ? c.qty+' · ' : ''}${c.cat}</div>
       </div>
       <button onclick="toggleCourse(${c.id})" style="width:38px;height:38px;border-radius:50%;border:2px solid ${c.done ? '#10b981' : '#94a3b8'};background:${c.done ? '#10b981' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:18px;color:${c.done ? 'white' : '#94a3b8'};cursor:pointer;flex-shrink:0;">✓</button>
-      <button onclick="moveToFridge(${c.id})" style="width:40px;height:40px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;margin-left:6px;">+</button>
+      <button onclick="event.stopPropagation();moveToFridge(${c.id})" style="width:40px;height:40px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;">+</button>
+      <button onclick="event.stopPropagation();deleteCourseItem(${c.id})" style="border:none;background:none;font-size:20px;cursor:pointer;padding:4px;margin-left:2px;" class="text-gray-300">×</button>
     </div>
   `).join('');
 }
@@ -755,11 +762,11 @@ function render() {
       </div>
       <span style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;background:${badge.bg};color:${badge.color||'white'};white-space:nowrap;">${badge.text}</span>
       <div style="display:flex;flex-direction:column;gap:2px;align-items:center;">
-        <button onclick="updateQty('${f.id}',1)" style="border:none;background:none;font-size:14px;cursor:pointer;line-height:1;padding:0;" class="text-gray-400">▲</button>
+        <button onclick="event.stopPropagation();updateQty('${f.id}',1)" style="border:none;background:none;font-size:14px;cursor:pointer;line-height:1;padding:0;" class="text-gray-400">▲</button>
         <span style="font-size:11px;" class="text-gray-500">${f.quantity}</span>
-        <button onclick="updateQty('${f.id}',-1)" style="border:none;background:none;font-size:14px;cursor:pointer;line-height:1;padding:0;" class="text-gray-400">▼</button>
+        <button onclick="event.stopPropagation();updateQty('${f.id}',-1)" style="border:none;background:none;font-size:14px;cursor:pointer;line-height:1;padding:0;" class="text-gray-400">▼</button>
       </div>
-      <button onclick="deleteFood('${f.id}')" style="border:none;background:none;font-size:20px;cursor:pointer;padding:4px;" class="text-gray-300">×</button>
+      <button onclick="event.stopPropagation();deleteFood('${f.id}')" style="border:none;background:none;font-size:20px;cursor:pointer;padding:4px;" class="text-gray-300">×</button>
     </div>`;
   }).join('');
 }
