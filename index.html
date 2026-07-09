@@ -33,6 +33,35 @@ body.dark .text-gray-300 { color: #4a5568 !important; }
 body.dark select, body.dark input, body.dark textarea { background: #1a1a2e !important; color: #e0e0e0 !important; border-color: #0f3460 !important; }
 body.dark input[type=checkbox] { accent-color: #3b82f6; }
 [onclick] { cursor: pointer; touch-action: manipulation; }
+
+/* Shared nav */
+.shared-nav { background: white; border-top: 1px solid #f1f5f9; padding: 6px 0 20px; display: flex; justify-content: space-around; z-index: 10; position: fixed; bottom: 0; left: 0; right: 0; }
+.nav-item { display: flex; flex-direction: column; align-items: center; border: none; background: none; font-size: 10px; cursor: pointer; padding: 4px 16px; color: #94a3b8; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.nav-item.active { color: #3b82f6; }
+.nav-item span { font-size: 22px; }
+
+/* Shared FAB */
+.shared-fab { width: 52px; height: 52px; border-radius: 50%; border: none; color: white; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59,130,246,0.35); cursor: pointer; position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%); z-index: 20; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: opacity 0.2s; }
+.shared-fab.hidden { opacity: 0; pointer-events: none; }
+.shared-fab.green { background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
+
+/* Card */
+.card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.food-card { background: white; border-radius: 16px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
+
+/* Animations */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.anim { animation: fadeUp 0.3s ease both; }
+.anim-d1 { animation-delay: 0.05s; }
+.anim-d2 { animation-delay: 0.1s; }
+.anim-d3 { animation-delay: 0.15s; }
+
+/* Extra padding for content so fixed nav/FAB don't overlap */
+.page-pb { padding-bottom: 100px; }
+
+body.dark .shared-nav, body.dark .shared-fab { border-top-color: #0f3460; }
+body.dark .shared-fab { box-shadow: none; }
+body.dark .card, body.dark .food-card { background: #16213e; border-color: #0f3460; }
 </style>
 </head>
 <body>
@@ -42,8 +71,8 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
   <div class="bg-white border-gray-100" style="padding:48px 20px 8px;border-bottom:1px solid;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <h1 style="font-size:22px;font-weight:700;">🧊 Mon Frigo</h1>
-        <p id="currentDate" style="font-size:13px;margin-top:2px;" class="text-gray-500"></p>
+        <h1 style="font-size:22px;font-weight:700;color:#111827;">🧊 Frigo de famille Lee</h1>
+        <p id="currentDate" style="font-size:13px;color:#9ca3af;margin-top:2px;"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
         <span style="font-size:12px;" class="text-gray-400">👨‍👩‍👧‍👧</span>
@@ -66,17 +95,7 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
     </div>
   </div>
   <div id="categoryFilter" class="bg-white border-gray-50" style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto;"></div>
-  <div id="foodList" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"></div>
-  <div style="position:fixed;bottom:72px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;">
-    <button onclick="showScreen('addScreen')" style="pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:#3b82f6;color:white;font-size:28px;box-shadow:0 4px 14px rgba(59,130,246,0.4);cursor:pointer;">+</button>
-  </div>
-  <div class="bg-white" style="position:fixed;bottom:0;left:0;right:0;padding:6px 20px 20px;">
-    <div style="display:flex;justify-content:space-around;text-align:center;">
-      <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#3b82f6;">Accueil</div></div>
-      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('coursesScreen')">Courses</div></div>
-      <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('settingsScreen')">Reglages</div></div>
-    </div>
-  </div>
+  <div id="foodList" class="page-pb" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;"></div>
 </div>
 
 <!-- ==================== COURSES SCREEN ==================== -->
@@ -87,20 +106,10 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
       <span class="text-gray-400" style="font-size:13px;" id="coursesCount">0</span>
     </div>
   </div>
-  <div id="coursesList" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;">
+  <div id="coursesList" class="page-pb" style="flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
     <div id="coursesEmpty" style="text-align:center;padding:60px 0;">
       <div style="font-size:48px;margin-bottom:12px;">📝</div>
       <p class="text-gray-500" style="font-size:16px;">Liste vide</p>
-    </div>
-  </div>
-  <div style="position:fixed;bottom:72px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;">
-    <button onclick="addCourseItem()" style="pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:#10b981;color:white;font-size:28px;box-shadow:0 4px 14px rgba(16,185,129,0.4);cursor:pointer;">+</button>
-  </div>
-  <div class="bg-white" style="position:fixed;bottom:0;left:0;right:0;padding:6px 20px 20px;">
-    <div style="display:flex;justify-content:space-around;text-align:center;">
-      <div><span style="font-size:20px;">🏠</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('mainScreen')">Accueil</div></div>
-      <div><span style="font-size:20px;">📋</span><div style="font-size:10px;color:#10b981;">Courses</div></div>
-      <div><span style="font-size:20px;">⚙️</span><div style="font-size:10px;color:#d1d5db;" onclick="showScreen('settingsScreen')">Reglages</div></div>
     </div>
   </div>
 </div>
@@ -225,6 +234,16 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
   </div>
 </div>
 
+<!-- ==================== SHARED FAB ==================== -->
+<button class="shared-fab" id="sharedFab">+</button>
+
+<!-- ==================== SHARED NAV ==================== -->
+<div class="shared-nav">
+  <button class="nav-item active" data-page="mainScreen"><span>🏠</span> Accueil</button>
+  <button class="nav-item" data-page="coursesScreen"><span>📋</span> Courses</button>
+  <button class="nav-item" data-page="settingsScreen"><span>⚙️</span> Réglages</button>
+</div>
+
 <script>
 // ===================== ERROR CATCHER =====================
 window.onerror = function(msg, url, line) {
@@ -242,7 +261,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.4.3';
+const APP_VERSION = '1.4.2';
 
 // Force refresh on version change
 (function() {
@@ -695,7 +714,7 @@ function render() {
 
   const container = document.getElementById('foodList');
   if (list.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:60px 0;"><div style="font-size:48px;margin-bottom:12px;">🧊</div><p style="font-size:16px;" class="text-gray-900">Le frigo est vide</p><p style="font-size:13px;" class="text-gray-500">Ajoutez des aliments</p></div>';
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:52px;margin-bottom:8px;">🧊</div><p style="font-size:17px;font-weight:600;color:#1f2937;">Le frigo est vide</p><p style="font-size:14px;color:#9ca3af;margin-bottom:16px;">Ajoutez vos premiers aliments</p><div style="display:flex;flex-direction:column;gap:8px;max-width:280px;margin:0 auto;"><div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;"><span style="font-size:22px;">🥛</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#1f2937;">Astuce</div><div style="font-size:12px;color:#9ca3af;">Tapez un nom ou choisissez dans la liste</div></div></div><div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;"><span style="font-size:22px;">👨‍👩‍👧‍👧</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#1f2937;">Partagé</div><div style="font-size:12px;color:#9ca3af;">Synchronisé avec votre partenaire</div></div></div></div></div>';
     return;
   }
   container.innerHTML = list.map(f => {
@@ -857,6 +876,19 @@ function showScreen(id) {
   if (id === 'addScreen') initAddScreen();
   if (id === 'coursesScreen') renderCourses();
   if (id === 'addCourseScreen') initAddCourseScreen();
+  
+  // Update shared nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === id));
+  
+  // Update shared FAB
+  const fab = document.getElementById('sharedFab');
+  if (id === 'addScreen' || id === 'settingsScreen' || id === 'addCourseScreen') {
+    fab.classList.add('hidden');
+  } else {
+    fab.classList.remove('hidden');
+    fab.classList.toggle('green', id === 'coursesScreen');
+    fab.onclick = id === 'coursesScreen' ? addCourseItem : () => showScreen('addScreen');
+  }
 }
 
 function initApp() {
