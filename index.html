@@ -104,6 +104,38 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
   </div>
 </div>
 
+<!-- ==================== ADD COURSE ITEM SCREEN ==================== -->
+<div id="addCourseScreen" class="screen">
+  <div class="bg-white border-gray-100" style="padding:48px 20px 16px;border-bottom:1px solid;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <button onclick="showScreen('coursesScreen')" style="border:none;background:none;font-size:16px;cursor:pointer;" class="text-gray-400">← Annuler</button>
+      <h1 style="font-size:18px;font-weight:700;" class="text-gray-900">Ajouter a la liste</h1>
+      <button onclick="saveCourseItem()" id="courseSaveBtn" disabled style="border:none;background:none;font-size:16px;font-weight:600;cursor:pointer;color:#d1d5db;">OK</button>
+    </div>
+  </div>
+  <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:20px;">
+    <div>
+      <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Article</label>
+      <div style="position:relative;">
+        <input id="courseInputName" placeholder="Ex: Lait, Oeufs, Poulet..." oninput="onCourseNameInput()" autocomplete="off" style="width:100%;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;">
+        <div id="courseNameDropdown" class="bg-white border-gray-100" style="display:none;position:absolute;z-index:50;border:1px solid;border-radius:12px;margin-top:4px;max-height:250px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:100%;"></div>
+      </div>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Quantite</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="courseAdjQty(-1)" class="bg-white border-gray-100" style="width:40px;height:40px;border-radius:10px;border:1px solid;font-size:18px;cursor:pointer;flex-shrink:0;">−</button>
+        <input id="courseInputQty" value="1" style="flex:1;padding:14px;border-radius:12px;border:1px solid #e5e7eb;font-size:16px;text-align:center;">
+        <button onclick="courseAdjQty(1)" class="bg-white border-gray-100" style="width:40px;height:40px;border-radius:10px;border:1px solid;font-size:18px;cursor:pointer;flex-shrink:0;">+</button>
+      </div>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;display:block;">Categorie</label>
+      <div id="courseCategoryPicker" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ==================== SETTINGS SCREEN ==================== -->
 <div id="settingsScreen" class="screen">
   <div class="bg-white border-gray-100" style="padding:48px 20px 16px;border-bottom:1px solid;">
@@ -322,6 +354,7 @@ function subscribe() {
 
 // ===================== COURSES =====================
 let courses = [];
+let courseSelectedCategory = 'Autres';
 function loadCourses() {
   try { const s = localStorage.getItem('fridge-courses'); if (s) courses = JSON.parse(s); } catch(e) {}
   renderCourses();
@@ -331,17 +364,86 @@ function saveCourses() {
 }
 
 function addCourseItem() {
-  const name = prompt('Ajouter un article:');
-  if (!name || !name.trim()) return;
-  const match = PRODUCT_DB.find(p => p.n.toLowerCase() === name.trim().toLowerCase());
+  showScreen('addCourseScreen');
+}
+
+function initAddCourseScreen() {
+  document.getElementById('courseInputName').value = '';
+  document.getElementById('courseInputQty').value = '1';
+  document.getElementById('courseNameDropdown').style.display = 'none';
+  courseSelectedCategory = 'Autres';
+  const picker = document.getElementById('courseCategoryPicker');
+  picker.innerHTML = CATEGORIES.map(c =>
+    `<button onclick="courseSelectCat('${c}')" class="cat-pick ${c==='Autres'?'active':''}">${CAT_ICONS[c]||''} ${c}</button>`
+  ).join('');
+  document.getElementById('courseSaveBtn').disabled = true;
+  document.getElementById('courseSaveBtn').style.color = '#d1d5db';
+}
+
+function courseSelectCat(c) {
+  courseSelectedCategory = c;
+  document.querySelectorAll('#courseCategoryPicker .cat-pick').forEach(el => {
+    el.classList.toggle('active', el.textContent.trim().includes(c));
+  });
+}
+
+function onCourseNameInput() {
+  const val = document.getElementById('courseInputName').value.trim().toLowerCase();
+  const dd = document.getElementById('courseNameDropdown');
+  if (!val) { dd.style.display = 'none'; courseCheckForm(); return; }
+  const matches = PRODUCT_DB.filter(p => p.n.toLowerCase().includes(val)).slice(0, 12);
+  if (matches.length === 0) { dd.style.display = 'none'; courseCheckForm(); return; }
+  dd.innerHTML = matches.map((p, i) =>
+    `<div onclick="courseSelectProduct(${i})" class="text-gray-900 border-gray-100" style="padding:12px 14px;font-size:15px;border-bottom:1px solid;cursor:pointer;display:flex;justify-content:space-between;">
+      <span>${p.n}</span>
+      <span class="text-gray-500" style="font-size:12px;">${CAT_ICONS[p.c]||''} ${p.c}</span>
+    </div>`
+  ).join('');
+  dd.style.display = 'block';
+  const exact = PRODUCT_DB.find(p => p.n.toLowerCase() === val);
+  if (exact) { courseSelectCat(exact.c); }
+  courseCheckForm();
+}
+
+function courseSelectProduct(idx) {
+  const items = document.getElementById('courseNameDropdown').children;
+  if (!items[idx]) return;
+  const nameSpan = items[idx].querySelector('span:first-child');
+  if (!nameSpan) return;
+  const match = PRODUCT_DB.find(p => p.n === nameSpan.textContent.trim());
+  if (!match) return;
+  document.getElementById('courseInputName').value = match.n;
+  courseSelectCat(match.c);
+  document.getElementById('courseNameDropdown').style.display = 'none';
+  courseCheckForm();
+}
+
+function courseAdjQty(delta) {
+  const el = document.getElementById('courseInputQty');
+  let v = parseInt(el.value) || 1;
+  v = Math.max(1, v + delta);
+  el.value = v;
+}
+
+function courseCheckForm() {
+  const name = document.getElementById('courseInputName').value.trim();
+  const btn = document.getElementById('courseSaveBtn');
+  btn.disabled = !name;
+  btn.style.color = name ? '#3b82f6' : '#d1d5db';
+}
+
+function saveCourseItem() {
+  const name = document.getElementById('courseInputName').value.trim();
+  if (!name) return;
   courses.push({
     id: Date.now(),
-    name: name.trim(),
-    cat: match ? match.c : 'Autres',
+    name,
+    qty: document.getElementById('courseInputQty').value || '1',
+    cat: courseSelectedCategory,
     done: false
   });
   saveCourses();
-  renderCourses();
+  showScreen('coursesScreen');
 }
 
 function toggleCourse(id) {
@@ -357,6 +459,7 @@ function moveToFridge(id) {
   // Go to add screen with pre-filled name
   showScreen('addScreen');
   document.getElementById('inputName').value = c.name;
+  if (c.qty) document.getElementById('inputQty').value = c.qty;
   const match = PRODUCT_DB.find(p => p.n.toLowerCase() === c.name.toLowerCase());
   if (match) { selectCat(match.c); document.getElementById('inputExpires').value = calcExpiry(match.s); }
   onNameInput();
@@ -727,6 +830,7 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   if (id === 'addScreen') initAddScreen();
   if (id === 'coursesScreen') renderCourses();
+  if (id === 'addCourseScreen') initAddCourseScreen();
 }
 
 function initApp() {
