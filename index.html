@@ -21,6 +21,7 @@ body.dark .text-gray-900 { color: #ccd6f6 !important; }
 body.dark .text-gray-500 { color: #8892b0 !important; }
 body.dark .text-gray-400 { color: #6b809e !important; }
 body.dark .border-gray-100 { border-color: #0f3460 !important; }
+body.dark [style*="border-bottom"] { border-bottom-color: #0f3460 !important; }
 body.dark .border-gray-50 { border-color: #0f3460 !important; }
 body.dark .bg-gray-50 { background: #112240 !important; }
 body.dark .bg-blue-50 { background: #112240 !important; }
@@ -71,6 +72,7 @@ body.dark .stat-bg-yellow { background: #1e3a1e !important; }
 body.dark .stat-bg-red { background: #3d1a1a !important; }
 .border-gray-100 { border: 1px solid #f1f5f9 !important; }
 body.dark .border-gray-100 { border-color: #0f3460 !important; }
+body.dark [style*="border-bottom"] { border-bottom-color: #0f3460 !important; }
 .food-card { border: 1px solid #f1f5f9 !important; }
 body.dark .food-card { border-color: #0f3460 !important; }
 </style>
@@ -540,7 +542,7 @@ function renderCourses() {
         <div class="text-gray-900" style="font-weight:600;font-size:15px;${c.done ? 'text-decoration:line-through;' : ''}">${c.name}</div>
         <div class="text-gray-400" style="font-size:12px;">${c.qty ? c.qty+' · ' : ''}${c.cat}</div>
       </div>
-      <button onclick="toggleCourse(${c.id})" style="width:40px;height:40px;border-radius:50%;border:2px solid ${c.done ? '#10b981' : '#d1d5db'};background:${c.done ? '#10b981' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;">✓</button>
+      <button onclick="toggleCourse(${c.id})" style="width:38px;height:38px;border-radius:50%;border:2px solid ${c.done ? '#10b981' : '#94a3b8'};background:${c.done ? '#10b981' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:18px;color:${c.done ? 'white' : '#94a3b8'};cursor:pointer;flex-shrink:0;">✓</button>
       <button onclick="moveToFridge(${c.id})" style="width:40px;height:40px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;margin-left:6px;">+</button>
     </div>
   `).join('');
