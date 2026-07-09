@@ -231,14 +231,27 @@ let currentFilter = 'Tous';
 (async function tryLogin(attempt) {
   attempt = attempt || 1;
   try {
+    // Try stored session first
+    const savedPw = localStorage.getItem('fridge-pw');
     const { data } = await _sb.auth.getSession();
     if (!data || !data.session) {
-      const { error } = await _sb.auth.signInWithPassword({ email: 'fridge@family.app', password: 'fridge123' });
-      if (error) throw new Error(error.message);
+      if (savedPw) {
+        const { error } = await _sb.auth.signInWithPassword({ email: 'fridge@family.app', password: savedPw });
+        if (error) throw new Error(error.message);
+      } else {
+        // First time - show prompt for password
+        const pw = prompt('Mot de passe du frigo:');
+        if (pw) {
+          const { error } = await _sb.auth.signInWithPassword({ email: 'fridge@family.app', password: pw });
+          if (error) throw new Error(error.message);
+          localStorage.setItem('fridge-pw', pw);
+        }
+      }
     }
   } catch(e) {
     const dm = document.getElementById('debugMsg');
     if (dm) dm.textContent = 'Login: ' + e.message;
+    localStorage.removeItem('fridge-pw');
     if (attempt < 3) {
       setTimeout(() => tryLogin(attempt + 1), 2000);
       return;
