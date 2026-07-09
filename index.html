@@ -91,7 +91,7 @@ body.dark .food-card { border-color: #0f3460 !important; }
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h1 style="font-size:22px;font-weight:700;color:#111827;">🧊 Frigo de famille Lee</h1>
-        <p id="currentDate" style="font-size:12px;color:#9ca3af;margin-top:1px;"></p>
+        <p id="currentDate" style="font-size:14px;color:#9ca3af;margin-top:2px;"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
         <span style="font-size:12px;" class="text-gray-400">👨‍👩‍👧‍👧</span>
@@ -723,7 +723,7 @@ function daysBetween(a, b) {
 function render() {
   if (!currentFamilyId) return;
   const now = new Date();
-  document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
   const total = foods.length;
   const soon = foods.filter(f => { const d = daysBetween(now.toISOString().split('T')[0], f.expires_at); return d >= 0 && d <= 3; }).length;
