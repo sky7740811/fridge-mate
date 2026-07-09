@@ -32,6 +32,7 @@ input, select, textarea { font-size: 16px; }
 body.dark .text-gray-300 { color: #4a5568 !important; }
 body.dark select, body.dark input, body.dark textarea { background: #1a1a2e !important; color: #e0e0e0 !important; border-color: #0f3460 !important; }
 body.dark input[type=checkbox] { accent-color: #3b82f6; }
+[onclick] { cursor: pointer; touch-action: manipulation; }
 </style>
 </head>
 <body>
@@ -169,6 +170,10 @@ body.dark input[type=checkbox] { accent-color: #3b82f6; }
       <div style="font-weight:600;">Vider le cache</div>
       <div class="text-gray-500" style="font-size:13px;">Forcer l'actualisation de l'app</div>
     </button>
+    <button onclick="exportData()" class="bg-white border-gray-100" style="border-radius:14px;padding:20px;border:1px solid;width:100%;text-align:left;cursor:pointer;">
+      <div style="font-weight:600;">📤 Exporter les donnees</div>
+      <div class="text-gray-500" style="font-size:13px;">Sauvegarder (JSON)</div>
+    </button>
   </div>
 </div>
 
@@ -259,6 +264,19 @@ let currentFamilyId = 'f90b7994-aec3-49c6-813c-04774c89f934';
 let foods = [];
 let currentFilter = 'Tous';
 
+// ===================== BACKUP =====================
+function backupFoods() {
+  try { localStorage.setItem('fridge-foods-backup', JSON.stringify(foods)); } catch(e) {}
+}
+function exportData() {
+  const data = { foods, courses, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fridge-mate-backup.json';
+  a.click();
+}
+
 // ===================== AUTO LOGIN =====================
 (async function tryLogin(attempt) {
   attempt = attempt || 1;
@@ -299,10 +317,14 @@ async function loadFoods() {
     const { data, error } = await _sb.from('foods').select('*').eq('family_id', currentFamilyId).order('expires_at', { ascending: true });
     if (error) throw error;
     foods = data || [];
+    backupFoods(); // Save backup on success
   } catch(e) {
     const dm = document.getElementById('debugMsg');
     if (dm) dm.textContent = 'Load: ' + e.message;
-    foods = [];
+    // Fallback to localStorage backup
+    const backup = localStorage.getItem('fridge-foods-backup');
+    if (backup) { foods = JSON.parse(backup); }
+    else { foods = []; }
   }
   render();
 }
@@ -321,7 +343,7 @@ async function addFood(item) {
     added_by: user ? user.id : '1cbb9bb0-5374-4613-beeb-071ce7561438',
     frozen: item.frozen || false,
   }).select().single();
-  if (!error && data) { foods.push(data); render(); }
+  if (!error && data) { foods.push(data); backupFoods(); render(); }
   if (error) { const dm = document.getElementById('debugMsg'); if (dm) dm.textContent = 'Add: ' + error.message; }
   return error;
 }
@@ -330,6 +352,7 @@ function deleteFood(id) {
   if (!confirm('Supprimer ?')) return;
   _sb.from('foods').delete().eq('id', id).then(() => {
     foods = foods.filter(f => f.id !== id);
+    backupFoods();
     render();
   });
 }
@@ -341,6 +364,7 @@ async function updateQty(id, delta) {
   qty = Math.max(1, qty + delta);
   f.quantity = String(qty);
   await _sb.from('foods').update({ quantity: f.quantity }).eq('id', id);
+  backupFoods();
   render();
 }
 // ===================== REALTIME =====================
