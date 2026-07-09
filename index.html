@@ -87,17 +87,17 @@ body.dark .food-card { border-color: #0f3460 !important; }
 
 <!-- ==================== MAIN SCREEN (default active) ==================== -->
 <div id="mainScreen" class="screen active">
-  <div class="bg-white border-gray-100" style="position:sticky;top:0;z-index:5;padding:32px 20px 4px;border-bottom:1px solid;">
+  <div class="bg-white border-gray-100" style="position:sticky;top:0;z-index:5;padding:28px 20px 2px;border-bottom:1px solid;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h1 style="font-size:22px;font-weight:700;color:#111827;">🧊 Frigo de famille Lee</h1>
-        <p id="currentDate" style="font-size:14px;color:#9ca3af;margin-top:2px;"></p>
+        <p id="currentDate" style="font-size:14px;color:#9ca3af;margin-top:1px;"></p>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
-        <span style="font-size:12px;" class="text-gray-400">👨‍👩‍👧‍👧</span>
+        <img src="icon.jpg" style="height:38px;width:auto;border-radius:8px;object-fit:cover;">
       </div>
     </div>
-    <div id="debugMsg" style="font-size:11px;color:#ef4444;margin-top:2px;min-height:14px;"></div>
+    <div id="debugMsg" style="font-size:11px;color:#ef4444;margin-top:2px;min-height:0;"></div>
   </div>
   <div class="bg-white border-gray-50" style="position:sticky;top:0;z-index:4;display:flex;gap:6px;padding:8px 20px;">
     <div class="bg-blue-50 stat-bg-blue" style="flex:1;border-radius:10px;padding:8px;text-align:center;">
@@ -280,7 +280,7 @@ window.addEventListener('unhandledrejection', function(e) {
 // ===================== SUPABASE =====================
 const SUPABASE_URL = 'https://bjuzhjkzkmmetsghmhsn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqdXpoamt6a21tZXRzZ2htaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzU4NTcsImV4cCI6MjA5OTExMTg1N30.zWzwPSJGgzjGI_Gh5aNwbxOqEWfa72_Pvzy61SFr7P8';
-const APP_VERSION = '1.7.3';
+const APP_VERSION = '1.7.4';
 
 // Force refresh on version change
 (function() {
