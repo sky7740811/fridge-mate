@@ -481,7 +481,7 @@ function renderCourses() {
       <div style="font-size:24px;width:36px;text-align:center;">${CAT_ICONS[c.cat]||'📦'}</div>
       <div style="flex:1;min-width:0;">
         <div class="text-gray-900" style="font-weight:600;font-size:15px;${c.done ? 'text-decoration:line-through;' : ''}">${c.name}</div>
-        <div class="text-gray-400" style="font-size:12px;">${c.cat}</div>
+        <div class="text-gray-400" style="font-size:12px;">${c.qty ? c.qty+' · ' : ''}${c.cat}</div>
       </div>
       <button onclick="toggleCourse(${c.id})" style="width:40px;height:40px;border-radius:50%;border:2px solid ${c.done ? '#10b981' : '#d1d5db'};background:${c.done ? '#10b981' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;">✓</button>
       <button onclick="moveToFridge(${c.id})" style="width:40px;height:40px;border-radius:50%;background:#3b82f6;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;cursor:pointer;flex-shrink:0;margin-left:6px;">+</button>
