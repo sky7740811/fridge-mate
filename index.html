@@ -660,7 +660,9 @@ const PROD_ICONS = {
 };
 
 function getProductIcon(product) {
-  return PROD_ICONS[product.n] || CAT_ICONS[product.c] || '📦';
+  const name = product.n || product.name;
+  const cat = product.c || product.cat || 'Autres';
+  return PROD_ICONS[name] || CAT_ICONS[cat] || '📦';
 }
 
 const PRODUCT_DB = [
