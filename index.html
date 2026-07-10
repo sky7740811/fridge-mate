@@ -461,7 +461,7 @@ function onCourseNameInput() {
   dd.innerHTML = matches.map((p, i) =>
     `<div onclick="courseSelectProduct(${i})" class="text-gray-900 border-gray-100" style="padding:12px 14px;font-size:15px;border-bottom:1px solid;cursor:pointer;display:flex;justify-content:space-between;">
       <span>${p.n}</span>
-      <span class="text-gray-500" style="font-size:12px;">${CAT_ICONS[p.c]||''} ${p.c}</span>
+      <span class="text-gray-500" style="font-size:12px;">${getProductIcon(p)} ${p.c}</span>
     </div>`
   ).join('');
   dd.style.display = 'block';
@@ -549,7 +549,7 @@ function renderCourses() {
 
   el.innerHTML = courses.map(c => `
     <div class="bg-white border-gray-100" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:14px 16px;border:1px solid;${c.done ? 'opacity:0.6;' : ''}">
-      <div style="font-size:24px;width:36px;text-align:center;">${CAT_ICONS[c.cat]||'📦'}</div>
+      <div style="font-size:24px;width:36px;text-align:center;">${PROD_ICONS[c.name] || CAT_ICONS[c.cat] || '📦'}</div>
       <div style="flex:1;min-width:0;">
         <div class="text-gray-900" style="font-weight:600;font-size:15px;${c.done ? 'text-decoration:line-through;' : ''}">${c.name}</div>
         <div class="text-gray-400" style="font-size:12px;">${c.qty ? c.qty+' · ' : ''}${c.cat}</div>
@@ -599,6 +599,69 @@ if (document.getElementById('appVersionDisplay')) {
 // ===================== UI =====================
 const CATEGORIES = ['Viande','Poisson','Legumes','Fruits','Produits laitiers','Boissons','Transforme','Epices','Autres'];
 const CAT_ICONS = { 'Viande':'🥩','Poisson':'🐟','Legumes':'🥬','Fruits':'🍎','Produits laitiers':'🧀','Boissons':'🥤','Transforme':'🥫','Epices':'🧂','Autres':'📦' };
+
+const PROD_ICONS = {
+  'Lait':'🥛','Beurre':'🧈','Fromage':'🧀','Yaourt':'🫙','Crème fraîche':'🥛','Œufs':'🥚','Oeufs':'🥚',
+  'Poulet':'🍗','Bœuf':'🥩','Steak haché':'🥩','Porc':'🥩','Jambon':'🍖','Saucisson':'🌭','Saucisse':'🌭',
+  'Carotte':'🥕','Tomate':'🍅','Salade':'🥬','Chou':'🥬','Brocoli':'🥦','Courgette':'🥒','Oignon':'🧅','Pomme terre':'🥔',
+  'Concombre':'🥒','Poivron':'🫑','Champignon':'🍄','Aubergine':'🍆',
+  'Pomme':'🍎','Pommes':'🍎','Banane':'🍌','Orange':'🍊','Raisin':'🍇','Fraise':'🍓','Citron':'🍋','Avocat':'🥑',
+  'Mangue':'🥭','Ananas':'🍍','Kiwi':'🥝','Pêche':'🍑','Abricot':'🍑','Cerise':'🍒','Framboise':'🫐','Myrtille':'🫐',
+  'Melon':'🍈','Pastèque':'🍉','Clémentine':'🍊',
+  'Tofu':'🧊','Eau':'💧','Jus orange':'🧃','Vin':'🍷','Bière':'🍺','Soda':'🥤','Limonade':'🥤','Thé':'🍵','Café':'☕',
+  'Eau gazeuse':'💧','Sirop':'🍯','Eau minérale':'💧','Jus pomme':'🧃','Jus raisin':'🧃','Jus multivitaminé':'🧃','Coca':'🥤',
+  'Perrier':'💧','San Pellegrino':'💧',
+  'Sauce tomate':'🥫','Mayonnaise':'🫙','Moutarde':'🫙','Sauce soja':'🫙','Huile olive':'🫒','Vinaigre':'🫗',
+  'Sauce BBQ':'🫙','Sauce Sriracha':'🌶️','Wasabi':'🟢','Curry':'🟡','Paprika':'🫑','Cannelle':'🟤','Vanille':'🌿',
+  'Gingembre':'🫚','Ail':'🧄',
+  'Sel':'🧂','Poivre':'🫘','Sucre':'🍚','Farine':'🌾','Riz':'🍚','Pâtes':'🍝','Céréales':'🥣','Pain':'🍞','Chocolat':'🍫',
+  'Confiture':'🍯','Miel':'🍯','Kimchi':'🥬','Huile sesame':'🫒','Gochujang':'🫙','Nouilles':'🍜','Ramen':'🍜',
+  'Sushi':'🍣','Saumon':'🍣','Crevettes':'🦐','Bacon':'🥓','Steak':'🥩','Agneau':'🐑','Canard':'🦆','Dinde':'🦃',
+  'Baguette':'🥖','Pain complet':'🍞','Croissant':'🥐','Cake':'🍰',
+  'Epinard':'🥬','Haricot vert':'🫘','Petit pois':'🫛','Maïs':'🌽','Betterave':'🫐','Radis':'🫙','Celeri':'🥬','Asperge':'🫘',
+  'Lait entier':'🥛','Lait demi-écrémé':'🥛','Lait ribot':'🥛','Crème dessert':'🍮','Petit suisse':'🫙',
+  'Mozzarella':'🧀','Parmesan':'🧀','Camembert':'🧀','Comté':'🧀','Chèvre':'🧀','Roquefort':'🧀','Feta':'🧀',
+  'Brie':'🧀','Reblochon':'🧀','Munster':'🧀','Cantal':'🧀','Emmental':'🧀','Gruyère':'🧀','Raclette':'🧀',
+  'Fromage râpé':'🧀','St Moret':'🧀','Philadelphia':'🧀','Mascarpone':'🧀','Ricotta':'🧀',
+  'Crème liquide':'🥛','Crème entière':'🥛','Crème chantilly':'🥛','Faisselle':'🫙',
+  'Yaourt grec':'🫙','Yaourt vanille':'🫙','Yaourt nature':'🫙','Yaourt fruit':'🫙',
+  'Beurre doux':'🧈','Beurre salé':'🧈','Beurre demi-sel':'🧈','Margarine':'🧈',
+  'Lait concentré sucré':'🥛','Lait concentré non sucré':'🥛','Lait en poudre':'🥛',
+  'Crème glace':'🍦','Glace vanille':'🍦','Sorbet':'🍧','Compote':'🫙','Purée':'🫙',
+  'Lentille':'🫘','Pois chiche':'🫘','Haricot rouge':'🫘',
+  'Tartinade':'🫙','Pâte à tartiner':'🫙','Nouilles chinoises':'🍜','Taboulé':'🥗','Salade composée':'🥗','Soupe':'🍲',
+  'Pizza surgelée':'🍕','Frites surgelées':'🍟','Petit pois surgelés':'🫛','Epinard surgelé':'🥬','Poisson surgelé':'🐟',
+  'Merguez':'🌭','Chipolata':'🌭','Boudin noir':'🌭','Boudin blanc':'🌭','Andouillette':'🫘','Andouille':'🫘',
+  'Jambon cru':'🍖','Jambon blanc':'🍖','Jambon fumé':'🍖','Pâté':'🧫','Rillette':'🧫','Terrine':'🧫',
+  'Foie gras':'🧫','Confit de canard':'🦆','Cassoulet':'🥫','Choucroute':'🥬',
+  'Escalope de veau':'🥩','Escalope de dinde':'🥩','Escalope de poulet':'🍗',
+  'Côte de porc':'🥩','Côte de bœuf':'🥩','Côte d\'agneau':'🐑',
+  'Cuisse de poulet':'🍗','Aile de poulet':'🍗',
+  'Lapin':'🐰','Cheval':'🐴','Gibier':'🦌','Faisan':'🦃','Caille':'🐦',
+  'Moule':'🦪','Huître':'🦪','Coquille Saint-Jacques':'🪸','Cabillaud':'🐟','Colin':'🐟','Lieu':'🐟','Sole':'🐟','Dorade':'🐟',
+  'Bar':'🐟','Maquereau':'🐟','Thon':'🐟','Saumon fumé':'🍣','Hareng':'🐟','Anchois':'🐟','Sardine':'🐟','Merlu':'🐟',
+  'Raie':'🐟','Baudroie':'🐟','Boulgour':'🍚','Semoule':'🍚','Couscous':'🍚','Quinoa':'🍚','Sarrasin':'🍚',
+  'Biscotte':'🍞','Granola':'🥣','Flocon maïs':'🥣','Corn Flakes':'🥣','Crêpe':'🥞','Gauffre':'🧇','Muesli':'🥣','Flocon avoine':'🥣',
+  'Pancake':'🥞','Cookie':'🍪','Madeleine':'🧁','Éclair':'🥐','Paris-Brest':'🥐','Crème brûlée':'🍮',
+  'Pain au chocolat':'🥐','Brioche':'🥐','Chausson pomme':'🥟',
+  'Bouillon cube':'🧊','Levure chimique':'🧊','Gélatine':'🧊','Levure':'🧊','Bicarbonate':'🧊',
+  'Cacahuète':'🥜','Amande':'🥜','Noix':'🥜','Pistache':'🥜','Noix cajou':'🥜','Noisette':'🥜','Noix pécan':'🥜',
+  'Pignon pin':'🥜','Sésame':'🫘','Graine lin':'🫘','Graine chia':'🫘',
+  'Nuggets':'🍗','Cordon bleu':'🧀','Gratin':'🥫','Purée mousseline':'🥔','Gnocchi':'🥟','Ravioli':'🥟',
+  'Lasagne':'🍝','Cannelloni':'🍝','Croque-monsieur':'🧀','Quiche':'🥧','Tarte':'🥧','Flan':'🍮',
+  'Clémentine':'🍊','Figue':'🫐','Prune':'🫐','Grenade':'🫐','Litchi':'🫐','Fruit passion':'🫐','Pamplemousse':'🍊','Nectarine':'🍑','Mirabelle':'🫐','Groseille':'🫐',
+  'Ketchup':'🍅','Sauce Nuoc mam':'🫗','Huile':'🫒',
+  'Bacon':'🥓','Œufs':'🥚','Oeufs':'🥚','Charcuterie':'🍖','Rôti de porc':'🥩','Rôti de bœuf':'🥩','Rôti de veau':'🥩',
+  'Crevette rose':'🦐','Langoustine':'🦐','Homard':'🦞','Crabe':'🦀','Crevettes':'🦐',
+  'Bulot':'🐚','Chips':'🫓','Crackers':'🫓','Biscuit':'🍪','Bonbon':'🍬','Guimauve':'🫧',
+  'Miel':'🍯','Confiture':'🍯',
+  'Lait ribot':'🥛','Crème dessert':'🍮',
+  'Biscotte':'🍞','Levure':'🧊','Bicarbonate':'🧊',
+};
+
+function getProductIcon(product) {
+  return PROD_ICONS[product.n] || CAT_ICONS[product.c] || '📦';
+}
 
 const PRODUCT_DB = [
   {n:'Lait',c:'Produits laitiers',s:10},{n:'Lait demi-écrémé',c:'Produits laitiers',s:10},{n:'Lait entier',c:'Produits laitiers',s:10},
@@ -752,7 +815,7 @@ function render() {
                   dDay <= 3 ? { bg:'#eab308', text:`J-${dDay}` } :
                   { bg:'#d1fae5', text:`J-${dDay}`, color:'#065f46' };
     return `<div class="food-card bg-white border-gray-100" onclick="editFood('${f.id}')" style="display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);cursor:pointer;">
-      <div style="font-size:28px;width:40px;text-align:center;">${CAT_ICONS[f.category]||'📦'}</div>
+      <div style="font-size:28px;width:40px;text-align:center;">${getProductIcon(f)}</div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-weight:600;font-size:16px;" class="text-gray-900">${f.name}</span>
@@ -789,7 +852,7 @@ function onNameInput() {
   dd.innerHTML = matches.map((p, i) =>
     `<div onclick="selectProduct(${i})" class="text-gray-900 border-gray-100" style="padding:12px 14px;font-size:15px;border-bottom:1px solid;cursor:pointer;display:flex;justify-content:space-between;">
       <span>${p.n}</span>
-      <span class="text-gray-500" style="font-size:12px;">${CAT_ICONS[p.c]||''} ${p.c}</span>
+      <span class="text-gray-500" style="font-size:12px;">${getProductIcon(p)} ${p.c}</span>
     </div>`
   ).join('');
   dd.style.display = 'block';
